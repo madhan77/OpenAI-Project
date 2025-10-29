@@ -150,6 +150,17 @@ The `frontend` directory houses a Vite + React + TypeScript single-page applicat
    ```
 4. Open the app at the URL shown in the terminal (default `http://localhost:5173`).
 
+#### Quick setup script
+
+To automate the first three steps, run the helper script from the project root:
+
+```bash
+./scripts/setup_frontend.sh
+```
+
+Pass `--start` to automatically launch `npm run dev` once installation completes, or `--skip-install` if you've already instal
+led dependencies.
+
 ### Accessing the App
 
 - There is currently no hosted environment for the Wellness Tracker dashboard; use the local development workflow above.
