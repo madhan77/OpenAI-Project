@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enterprise-sales-agent"
+version = "0.1.0"
+description = "Reference implementation of an enterprise sales enablement agent"
+authors = [{name = "OpenAI Project Team"}]
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = []
+auth = ["firebase-admin>=6.2.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"enterprise_sales_agent.resources" = ["mock_dataset.json"]

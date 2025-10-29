@@ -1,0 +1,169 @@
+{
+  "accounts": [
+    {
+      "id": "acme-industries",
+      "name": "Acme Industries",
+      "industry": "Manufacturing",
+      "annual_revenue": 1800000000.0,
+      "employee_count": 5400,
+      "headquarters": "Chicago, IL",
+      "recent_news": [
+        "Announced expansion of smart factory initiative",
+        "Selected as finalist for Industry Innovation Award"
+      ],
+      "stakeholders": [
+        {
+          "name": "Lena Howard",
+          "title": "VP of Operations",
+          "email": "lena.howard@acmeindustries.com",
+          "relationship_status": "Champion"
+        },
+        {
+          "name": "Raj Patel",
+          "title": "CIO",
+          "email": "raj.patel@acmeindustries.com",
+          "relationship_status": "Supporter"
+        },
+        {
+          "name": "Simone Yang",
+          "title": "Procurement Director",
+          "email": "simone.yang@acmeindustries.com",
+          "relationship_status": "Neutral"
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "OPP-1001",
+          "name": "Enterprise Analytics Platform",
+          "stage": "Proposal/Price Quote",
+          "amount": 450000.0,
+          "close_date": "2024-06-20",
+          "health_score": 72,
+          "next_steps": [
+            "Follow up on security questionnaire",
+            "Coordinate reference call with manufacturing customer"
+          ],
+          "risks": [
+            "Budget review pushed to next quarter",
+            "Need executive sponsor sign-off"
+          ]
+        },
+        {
+          "id": "OPP-1002",
+          "name": "Field Service Optimization",
+          "stage": "Value Proposition",
+          "amount": 220000.0,
+          "close_date": "2024-07-15",
+          "health_score": 58,
+          "next_steps": [
+            "Schedule discovery with operations team"
+          ],
+          "risks": [
+            "Competing pilot with incumbent vendor"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "globex",
+      "name": "Globex Corporation",
+      "industry": "Technology",
+      "annual_revenue": 3200000000.0,
+      "employee_count": 7200,
+      "headquarters": "Austin, TX",
+      "recent_news": [
+        "Completed acquisition of data security startup SecureIQ",
+        "Named a leader in Gartner Magic Quadrant for Cloud Platforms"
+      ],
+      "stakeholders": [
+        {
+          "name": "Amanda Clarke",
+          "title": "Chief Revenue Officer",
+          "email": "amanda.clarke@globex.com",
+          "relationship_status": "Champion"
+        },
+        {
+          "name": "Eduardo Silva",
+          "title": "VP Finance",
+          "email": "eduardo.silva@globex.com",
+          "relationship_status": "Skeptic"
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "OPP-2001",
+          "name": "AI-Powered Forecasting",
+          "stage": "Negotiation/Review",
+          "amount": 780000.0,
+          "close_date": "2024-05-30",
+          "health_score": 81,
+          "next_steps": [
+            "Finalize redlines with legal",
+            "Share updated implementation timeline"
+          ],
+          "risks": [
+            "Need CFO approval for pre-pay discount"
+          ]
+        }
+      ]
+    }
+  ],
+  "meetings": {
+    "acme-industries": [
+      {
+        "id": "MTG-9001",
+        "account_id": "acme-industries",
+        "datetime": "2024-05-06T15:00:00",
+        "attendees": [
+          "Jordan Blake (Account Executive)",
+          "Lena Howard",
+          "Raj Patel"
+        ],
+        "objectives": [
+          "Review security questionnaire responses",
+          "Align on next steps for proof-of-concept"
+        ],
+        "opportunity_id": "OPP-1001"
+      }
+    ],
+    "globex": [
+      {
+        "id": "MTG-9002",
+        "account_id": "globex",
+        "datetime": "2024-05-08T11:00:00",
+        "attendees": [
+          "Taylor Reed (Account Executive)",
+          "Amanda Clarke",
+          "Eduardo Silva"
+        ],
+        "objectives": [
+          "Walk through updated ROI analysis",
+          "Confirm legal redline timeline"
+        ],
+        "opportunity_id": "OPP-2001"
+      }
+    ]
+  },
+  "tasks": {
+    "acme-industries": [
+      {
+        "id": "TSK-3001",
+        "description": "Send security questionnaire follow-up email",
+        "due_date": "2024-05-03",
+        "owner": "Jordan Blake",
+        "related_account_id": "acme-industries",
+        "related_opportunity_id": "OPP-1001"
+      }
+    ],
+    "globex": [
+      {
+        "id": "TSK-3002",
+        "description": "Share implementation plan with Globex legal team",
+        "due_date": "2024-05-02",
+        "owner": "Taylor Reed",
+        "related_account_id": "globex",
+        "related_opportunity_id": "OPP-2001"
+      }
+    ]
+  }
+}
