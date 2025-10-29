@@ -4,17 +4,48 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import Any
+from typing import Any, Optional
 
-from enterprise_sales_agent import EnterpriseSalesAgent
+from enterprise_sales_agent import EnterpriseSalesAgent, FirebaseAuthError, FirebaseAuthService
 
 
 def _print_payload(payload: Any) -> None:
     print(json.dumps(payload, indent=2))
 
 
+def _authenticate_if_requested(args: argparse.Namespace) -> Optional[str]:
+    if not args.firebase_token:
+        return None
+
+    auth_service = FirebaseAuthService(
+        credentials_path=args.firebase_credentials,
+        project_id=args.firebase_project,
+        use_emulator=args.use_firebase_emulator,
+    )
+    try:
+        user = auth_service.authenticate(args.firebase_token)
+    except FirebaseAuthError as exc:
+        raise SystemExit(f"Firebase authentication failed: {exc}") from exc
+
+    identity = user.email or user.uid
+    print(f"Authenticated Firebase user: {identity}")
+    return identity
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Enterprise Sales Agent CLI")
+    parser.add_argument("--firebase-token", help="Firebase ID token to authenticate requests")
+    parser.add_argument(
+        "--firebase-credentials",
+        help="Path to Firebase service account JSON used to verify ID tokens",
+    )
+    parser.add_argument("--firebase-project", help="Firebase project ID")
+    parser.add_argument(
+        "--use-firebase-emulator",
+        action="store_true",
+        help="Use the Firebase Authentication emulator (credentials optional)",
+    )
+
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     briefing_parser = subparsers.add_parser("briefing", help="Generate account briefing")
@@ -43,6 +74,8 @@ def main() -> None:
     convo_parser.add_argument("message", help="Free-form message to the agent")
 
     args = parser.parse_args()
+    _authenticate_if_requested(args)
+
     agent = EnterpriseSalesAgent()
 
     if args.command == "briefing":
@@ -75,4 +108,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

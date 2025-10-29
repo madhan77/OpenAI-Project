@@ -1,17 +1,14 @@
-"""Sample data models used by the Enterprise Sales Agent.
-
-The project does not integrate with real third-party systems, so a curated
-set of representative enterprise sales data is provided to let developers run
-and test the application locally. The data is intentionally small but covers
-key artifacts referenced throughout the PRD, such as accounts, opportunities,
-meetings, and historical performance indicators.
-"""
+"""Sample data models and mock dataset loader for the Enterprise Sales Agent."""
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import Dict, List, Optional
+from importlib import resources
+from typing import Dict, List, Optional, Tuple
+
+_DATASET_RESOURCE = "mock_dataset.json"
 
 
 @dataclass
@@ -77,179 +74,71 @@ class Task:
     related_opportunity_id: Optional[str] = None
 
 
-# Sample dataset -----------------------------------------------------------
+def _load_mock_dataset() -> Tuple[Dict[str, Account], Dict[str, List[Meeting]], Dict[str, List[Task]]]:
+    """Load the curated mock dataset shipped with the package."""
 
-STAKEHOLDERS: Dict[str, List[Stakeholder]] = {
-    "acme-industries": [
-        Stakeholder(
-            name="Lena Howard",
-            title="VP of Operations",
-            email="lena.howard@acmeindustries.com",
-            relationship_status="Champion",
-        ),
-        Stakeholder(
-            name="Raj Patel",
-            title="CIO",
-            email="raj.patel@acmeindustries.com",
-            relationship_status="Supporter",
-        ),
-        Stakeholder(
-            name="Simone Yang",
-            title="Procurement Director",
-            email="simone.yang@acmeindustries.com",
-            relationship_status="Neutral",
-        ),
-    ],
-    "globex": [
-        Stakeholder(
-            name="Amanda Clarke",
-            title="Chief Revenue Officer",
-            email="amanda.clarke@globex.com",
-            relationship_status="Champion",
-        ),
-        Stakeholder(
-            name="Eduardo Silva",
-            title="VP Finance",
-            email="eduardo.silva@globex.com",
-            relationship_status="Skeptic",
-        ),
-    ],
-}
+    with resources.open_text("enterprise_sales_agent.resources", _DATASET_RESOURCE) as fh:
+        raw = json.load(fh)
 
-OPPORTUNITIES: Dict[str, List[Opportunity]] = {
-    "acme-industries": [
-        Opportunity(
-            id="OPP-1001",
-            name="Enterprise Analytics Platform",
-            stage="Proposal/Price Quote",
-            amount=450000.0,
-            close_date=date(2024, 6, 20),
-            health_score=72,
-            next_steps=[
-                "Follow up on security questionnaire",
-                "Coordinate reference call with manufacturing customer",
-            ],
-            risks=[
-                "Budget review pushed to next quarter",
-                "Need executive sponsor sign-off",
-            ],
-        ),
-        Opportunity(
-            id="OPP-1002",
-            name="Field Service Optimization",
-            stage="Value Proposition",
-            amount=220000.0,
-            close_date=date(2024, 7, 15),
-            health_score=58,
-            next_steps=["Schedule discovery with operations team"],
-            risks=["Competing pilot with incumbent vendor"],
-        ),
-    ],
-    "globex": [
-        Opportunity(
-            id="OPP-2001",
-            name="AI-Powered Forecasting",
-            stage="Negotiation/Review",
-            amount=780000.0,
-            close_date=date(2024, 5, 30),
-            health_score=81,
-            next_steps=[
-                "Finalize redlines with legal",
-                "Share updated implementation timeline",
-            ],
-            risks=["Need CFO approval for pre-pay discount"],
-        ),
-    ],
-}
+    accounts: Dict[str, Account] = {}
+    for account_data in raw["accounts"]:
+        stakeholders = [Stakeholder(**stakeholder) for stakeholder in account_data.get("stakeholders", [])]
+        opportunities = [
+            Opportunity(
+                id=opportunity["id"],
+                name=opportunity["name"],
+                stage=opportunity["stage"],
+                amount=float(opportunity["amount"]),
+                close_date=date.fromisoformat(opportunity["close_date"]),
+                health_score=int(opportunity["health_score"]),
+                next_steps=list(opportunity.get("next_steps", [])),
+                risks=list(opportunity.get("risks", [])),
+            )
+            for opportunity in account_data.get("opportunities", [])
+        ]
 
-ACCOUNTS: Dict[str, Account] = {
-    "acme-industries": Account(
-        id="acme-industries",
-        name="Acme Industries",
-        industry="Manufacturing",
-        annual_revenue=1.8e9,
-        employee_count=5400,
-        headquarters="Chicago, IL",
-        recent_news=[
-            "Announced expansion of smart factory initiative",
-            "Selected as finalist for Industry Innovation Award",
-        ],
-        stakeholders=STAKEHOLDERS["acme-industries"],
-        opportunities=OPPORTUNITIES["acme-industries"],
-    ),
-    "globex": Account(
-        id="globex",
-        name="Globex Corporation",
-        industry="Technology",
-        annual_revenue=3.2e9,
-        employee_count=7200,
-        headquarters="Austin, TX",
-        recent_news=[
-            "Completed acquisition of data security startup SecureIQ",
-            "Named a leader in Gartner Magic Quadrant for Cloud Platforms",
-        ],
-        stakeholders=STAKEHOLDERS["globex"],
-        opportunities=OPPORTUNITIES["globex"],
-    ),
-}
+        account = Account(
+            id=account_data["id"],
+            name=account_data["name"],
+            industry=account_data["industry"],
+            annual_revenue=float(account_data["annual_revenue"]),
+            employee_count=int(account_data["employee_count"]),
+            headquarters=account_data["headquarters"],
+            recent_news=list(account_data.get("recent_news", [])),
+            stakeholders=stakeholders,
+            opportunities=opportunities,
+        )
+        accounts[account.id] = account
 
-MEETINGS: Dict[str, List[Meeting]] = {
-    "acme-industries": [
-        Meeting(
-            id="MTG-9001",
-            account_id="acme-industries",
-            datetime=datetime(2024, 5, 6, 15, 0),
-            attendees=[
-                "Jordan Blake (Account Executive)",
-                "Lena Howard",
-                "Raj Patel",
-            ],
-            objectives=[
-                "Review security questionnaire responses",
-                "Align on next steps for proof-of-concept",
-            ],
-            opportunity_id="OPP-1001",
-        ),
-    ],
-    "globex": [
-        Meeting(
-            id="MTG-9002",
-            account_id="globex",
-            datetime=datetime(2024, 5, 8, 11, 0),
-            attendees=[
-                "Taylor Reed (Account Executive)",
-                "Amanda Clarke",
-                "Eduardo Silva",
-            ],
-            objectives=[
-                "Walk through updated ROI analysis",
-                "Confirm legal redline timeline",
-            ],
-            opportunity_id="OPP-2001",
-        ),
-    ],
-}
+    meetings: Dict[str, List[Meeting]] = {}
+    for account_id, meeting_list in raw.get("meetings", {}).items():
+        meetings[account_id] = [
+            Meeting(
+                id=meeting["id"],
+                account_id=meeting["account_id"],
+                datetime=datetime.fromisoformat(meeting["datetime"]),
+                attendees=list(meeting.get("attendees", [])),
+                objectives=list(meeting.get("objectives", [])),
+                opportunity_id=meeting.get("opportunity_id"),
+            )
+            for meeting in meeting_list
+        ]
 
-TASKS: Dict[str, List[Task]] = {
-    "acme-industries": [
-        Task(
-            id="TSK-3001",
-            description="Send security questionnaire follow-up email",
-            due_date=date(2024, 5, 3),
-            owner="Jordan Blake",
-            related_account_id="acme-industries",
-            related_opportunity_id="OPP-1001",
-        ),
-    ],
-    "globex": [
-        Task(
-            id="TSK-3002",
-            description="Share implementation plan with Globex legal team",
-            due_date=date(2024, 5, 2),
-            owner="Taylor Reed",
-            related_account_id="globex",
-            related_opportunity_id="OPP-2001",
-        ),
-    ],
-}
+    tasks: Dict[str, List[Task]] = {}
+    for account_id, task_list in raw.get("tasks", {}).items():
+        tasks[account_id] = [
+            Task(
+                id=task["id"],
+                description=task["description"],
+                due_date=date.fromisoformat(task["due_date"]),
+                owner=task["owner"],
+                related_account_id=task.get("related_account_id"),
+                related_opportunity_id=task.get("related_opportunity_id"),
+            )
+            for task in task_list
+        ]
 
+    return accounts, meetings, tasks
+
+
+ACCOUNTS, MEETINGS, TASKS = _load_mock_dataset()

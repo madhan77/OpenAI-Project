@@ -13,6 +13,10 @@ license = {text = "MIT"}
 
 [project.optional-dependencies]
 dev = []
+auth = ["firebase-admin>=6.2.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"enterprise_sales_agent.resources" = ["mock_dataset.json"]
