@@ -13,6 +13,7 @@ The claims processing application promotes the PRD commitments into an executabl
 - **Payments Module** – Generates Explanation of Benefits artifacts and payment instructions through an injectable gateway abstraction.
 - **Notification Orchestrator** – Dispatches provider/member communications across email, SMS, and portal channels while capturing analytics.
 - **Analytics Collector** – Aggregates metrics such as intake volume, pending information, manual review rates, auto-adjudication counts, and notification fan-out.
+- **Reviewer Portal** – Static web experience backed by Firebase Authentication that surfaces mock claim queues, details, and performance summaries for stakeholders.
 
 ## Key Workflows
 1. **Submit Claim** – Intake saves the claim, records baseline analytics, and immediately transitions to validation.
@@ -21,10 +22,18 @@ The claims processing application promotes the PRD commitments into an executabl
 4. **Auto-Adjudication** – Successful claims produce payment instructions, EOB summaries, analytics updates, and multi-channel notifications, culminating in a `NOTIFIED` status.
 5. **Post-Processing** – All paths maintain an immutable event timeline for auditability, supporting downstream reviewer portals and compliance reporting.
 
+## Reviewer Portal Experience
+The portal focuses on rapid sign-off for formal review:
+- Firebase Authentication protects access. Administrators configure the `firebase-config.js` file with production credentials and provision reviewer accounts via Firebase console.
+- Authenticated reviewers explore mock claim queues that mirror adjudication states (approved, denied, pending information, manual review).
+- Summary tiles surface portfolio KPIs (counts and dollar aggregates), while the queue and detail panels provide drill-down context and timeline notes.
+- The portal intentionally relies on static mock data, enabling demonstrations without exposing PHI or requiring backend connectivity.
+
 ## Extensibility
 - Validators and rules are constructed via protocols, enabling runtime composition of payer-specific policies.
 - Repository, notification, and payment abstractions allow integration with enterprise systems without refactoring the orchestrator.
 - Metrics collector can be replaced with observability platforms (e.g., Prometheus, Datadog) by implementing the same interface.
+- The portal can be wired to live APIs by swapping the mock data module for REST/GraphQL clients once services are available.
 
 ## Review Readiness Highlights
 - Implements the PRD’s core automation, manual review workflow, transparency, and analytics expectations.
