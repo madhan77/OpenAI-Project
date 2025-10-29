@@ -98,7 +98,6 @@ export const resolvers = {
         recordedAt: input.recordedAt ? ensureDate(input.recordedAt, 'recordedAt') : new Date(),
       };
       activityStore.addActivity(activity);
-      summaryStore.updateFromActivity(activity);
       return activity;
     },
     logSleepSession: (_, { input }) => {
@@ -115,7 +114,6 @@ export const resolvers = {
         createdAt: new Date(),
       };
       sleepStore.addSession(session);
-      summaryStore.updateFromSleep(durationMinutes);
       return session;
     },
     logNutritionEntry: (_, { input }) => {
@@ -130,7 +128,6 @@ export const resolvers = {
         recordedAt: input.recordedAt ? ensureDate(input.recordedAt, 'recordedAt') : new Date(),
       };
       nutritionStore.addEntry(entry);
-      summaryStore.updateFromNutrition(entry);
       return entry;
     },
     logHydration: (_, { input }) => {
@@ -141,7 +138,6 @@ export const resolvers = {
         recordedAt: input.recordedAt ? ensureDate(input.recordedAt, 'recordedAt') : new Date(),
       };
       hydrationStore.addLog(log);
-      summaryStore.updateFromHydration(log);
       return log;
     },
     logHeartRate: (_, { input }) => {
@@ -156,7 +152,6 @@ export const resolvers = {
         context: input.context ?? null,
       };
       heartRateStore.addSample(sample);
-      summaryStore.updateFromHeartRate(sample);
       return sample;
     },
     logMindfulnessSession: (_, { input }) => {
@@ -202,7 +197,6 @@ export const resolvers = {
       };
 
       checkInStore.addCheckIn(checkIn);
-      summaryStore.updateFromCheckIn(checkIn);
       return checkIn;
     },
     setGoal: (_, { input }) => {

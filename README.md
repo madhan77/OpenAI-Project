@@ -6,7 +6,7 @@ This repository contains planning artifacts and the first implementation steps f
 - [Wellness Tracker Agent — Product Requirements Document](docs/wellness_tracker_agent_prd.md)
 
 ## Backend Service
-The `backend` directory contains a Node.js + Express + Apollo Server project that exposes a starter GraphQL API for tracking activities, sleep, nutrition, hydration, heart rate, mindfulness sessions, daily check-ins, personalized insights, goals, and rolling wellness summaries. Data is stored in-memory for now, which keeps the service simple while the domain model and integrations are explored.
+The `backend` directory contains a Node.js + Express + Apollo Server project that exposes a starter GraphQL API for tracking activities, sleep, nutrition, hydration, heart rate, mindfulness sessions, daily check-ins, personalized insights, goals, and rolling wellness summaries. Wellness data is now persisted to disk using a lightweight JSON document store so records survive service restarts while deeper infrastructure work (PostgreSQL, Redis, etc.) is planned.
 
 ### Getting Started
 1. Install dependencies:
@@ -24,6 +24,12 @@ The `backend` directory contains a Node.js + Express + Apollo Server project tha
    npm run dev
    ```
 4. Access the health check at `http://localhost:4000/health` and the GraphQL Playground at `http://localhost:4000/graphql`.
+
+### Data Persistence
+
+- Logged activity, recovery, and wellness data is written to `backend/storage/store.json`. The file is automatically created the first time the service receives a mutation.
+- The storage directory already ignores `store.json` in git so you can safely reset the datastore by deleting the file.
+- Because the service aggregates the complete dataset after each write, manual edits to `store.json` should maintain the expected property shapes (ISO date strings, numeric metrics) to avoid inconsistent summaries.
 
 ### GraphQL Overview
 
