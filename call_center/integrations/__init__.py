@@ -1,19 +1,19 @@
 """Integration connectors for external systems."""
 
-from .chat import ChatIntegrationError, ChatMessage, MobileMessagingGateway, WebChatGateway
-from .crm import CRMIntegrationError, CRMRecord, SalesforceClient, ZendeskClient
-from .telephony import CallSession, TelephonyIntegrationError, TwilioVoiceGateway
+from .chat import ChatIntegrationError, ChatMessage, MockMobileMessagingGateway, MockWebChatGateway
+from .crm import CRMIntegrationError, CRMRecord, MockSalesforceClient, MockZendeskClient
+from .telephony import CallSession, MockTelephonyGateway, TelephonyIntegrationError
 
 __all__ = [
     "ChatIntegrationError",
     "ChatMessage",
-    "MobileMessagingGateway",
-    "WebChatGateway",
+    "MockMobileMessagingGateway",
+    "MockWebChatGateway",
     "CRMIntegrationError",
     "CRMRecord",
-    "SalesforceClient",
-    "ZendeskClient",
+    "MockSalesforceClient",
+    "MockZendeskClient",
     "CallSession",
     "TelephonyIntegrationError",
-    "TwilioVoiceGateway",
+    "MockTelephonyGateway",
 ]

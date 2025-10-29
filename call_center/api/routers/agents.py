@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 
 from ...center import CallCenter, RoutingError
 from ...models import Agent, AgentStatus, Role
-from ...security import AuthorizationService
-from ..dependencies import authorize, get_auth_service, get_call_center
+from ..dependencies import authorize, get_call_center
 
 
 router = APIRouter(prefix="/agents", tags=["agents"])
@@ -62,23 +62,23 @@ def update_skills(
     return call_center.agents[agent_id]
 
 
-@router.post("/{agent_id}/password")
-def set_password(
+class FirebaseIdentityPayload(BaseModel):
+    firebase_uid: str
+
+
+@router.post("/{agent_id}/identity")
+def assign_firebase_identity(
     agent_id: str,
-    payload: dict,
+    payload: FirebaseIdentityPayload,
     call_center: CallCenter = Depends(get_call_center),
-    auth_service: AuthorizationService = Depends(get_auth_service),
     authz: dict = Depends(authorize),
-) -> dict:
+) -> Agent:
     _require_role(authz, {Role.ADMIN.value, Role.SUPERVISOR.value})
     agent = call_center.agents.get(agent_id)
     if not agent:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found")
-    password = payload.get("password")
-    if not password:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Password required")
-    agent.password_hash = auth_service.hash_password(password)
-    return {"status": "ok"}
+    agent.firebase_uid = payload.firebase_uid
+    return agent
 
 
 def _require_role(authz: dict, roles: set[str]) -> None:

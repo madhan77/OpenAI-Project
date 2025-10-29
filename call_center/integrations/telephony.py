@@ -1,21 +1,17 @@
-"""Telephony integration layer for the production call center platform."""
+"""In-memory telephony adapter backed by mock data."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any, Dict, Optional
-
-import httpx
-
-from ..config import get_config
+from dataclasses import dataclass, field
+from typing import Dict, Optional
 
 
 class TelephonyIntegrationError(RuntimeError):
-    """Raised when the telephony provider cannot fulfil a request."""
+    """Raised when the mock telephony provider cannot fulfil a request."""
 
 
 @dataclass
 class CallSession:
-    """Represents the lifecycle of a call bridged through the telephony provider."""
+    """Represents the lifecycle of a call bridged through the mock provider."""
 
     call_sid: str
     interaction_id: str
@@ -23,66 +19,49 @@ class CallSession:
     agent_id: Optional[str] = None
     customer_number: Optional[str] = None
     recording_sid: Optional[str] = None
+    metadata: Dict[str, str] = field(default_factory=dict)
 
 
-class TwilioVoiceGateway:
-    """Thin wrapper around the Twilio REST API used by the call center platform."""
+class MockTelephonyGateway:
+    """Simple in-memory telephony implementation used for demos and tests."""
 
-    def __init__(self, *, client: Optional[httpx.AsyncClient] = None) -> None:
-        config = get_config()
-        if not config.twilio_account_sid or not config.twilio_auth_token:
-            raise TelephonyIntegrationError(
-                "Twilio credentials are not configured; set CALL_CENTER_TWILIO_ACCOUNT_SID and CALL_CENTER_TWILIO_AUTH_TOKEN."
-            )
-
-        self._account_sid = config.twilio_account_sid
-        self._auth = (config.twilio_account_sid, config.twilio_auth_token)
-        base_url = str(config.twilio_base_url or "https://api.twilio.com/2010-04-01")
-        self._client = client or httpx.AsyncClient(base_url=base_url, auth=self._auth)
+    def __init__(self) -> None:
+        self._sessions: Dict[str, CallSession] = {}
+        self._recordings: Dict[str, bytes] = {
+            "rec-001": b"MOCK RECORDING DATA",
+            "rec-002": b"ADDITIONAL SAMPLE",
+        }
 
     async def initiate_call(self, from_number: str, to_number: str, *, interaction_id: str) -> CallSession:
-        """Initiate an outbound call through Twilio."""
-
-        payload = {
-            "From": from_number,
-            "To": to_number,
-            "Url": "https://handler.call-center.local/voice/ivr",
-        }
-        response = await self._client.post(f"/Accounts/{self._account_sid}/Calls.json", data=payload)
-        response.raise_for_status()
-        data = response.json()
-        return CallSession(call_sid=data["sid"], interaction_id=interaction_id, queue="outbound")
+        call_sid = f"CA{len(self._sessions) + 1:08d}"
+        session = CallSession(
+            call_sid=call_sid,
+            interaction_id=interaction_id,
+            queue="outbound",
+            customer_number=to_number,
+        )
+        self._sessions[call_sid] = session
+        return session
 
     async def bridge_agent(self, call_sid: str, agent_number: str) -> None:
-        """Connect an available agent to the call via TwiML instructions."""
-
-        payload = {"Url": "https://handler.call-center.local/voice/connect", "Method": "POST"}
-        response = await self._client.post(
-            f"/Accounts/{self._account_sid}/Calls/{call_sid}.json", data=payload
-        )
-        response.raise_for_status()
+        session = self._sessions.get(call_sid)
+        if session is None:
+            raise TelephonyIntegrationError("Unknown call session")
+        session.agent_id = agent_number
 
     async def fetch_recording(self, recording_sid: str) -> bytes:
-        """Download a call recording for compliance review."""
+        if recording_sid not in self._recordings:
+            raise TelephonyIntegrationError("Recording not found")
+        return self._recordings[recording_sid]
 
-        response = await self._client.get(
-            f"/Accounts/{self._account_sid}/Recordings/{recording_sid}.mp3"
-        )
-        response.raise_for_status()
-        return response.content
+    async def update_call_metadata(self, call_sid: str, *, metadata: Dict[str, str]) -> None:
+        session = self._sessions.get(call_sid)
+        if session is None:
+            raise TelephonyIntegrationError("Unknown call session")
+        session.metadata.update(metadata)
 
-    async def update_call_metadata(self, call_sid: str, *, metadata: Dict[str, Any]) -> None:
-        """Attach custom metadata to a call via Twilio's Call Updates API."""
-
-        payload = {f"Twilio-Call-Data-{key}": value for key, value in metadata.items()}
-        response = await self._client.post(
-            f"/Accounts/{self._account_sid}/Calls/{call_sid}.json", data=payload
-        )
-        response.raise_for_status()
-
-    async def close(self) -> None:
-        await self._client.aclose()
+    async def close(self) -> None:  # pragma: no cover - retained for API parity
+        self._sessions.clear()
 
 
-__all__ = ["TwilioVoiceGateway", "TelephonyIntegrationError", "CallSession"]
-
+__all__ = ["MockTelephonyGateway", "TelephonyIntegrationError", "CallSession"]

@@ -5,13 +5,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Iterable, Optional
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from .config import get_config
-from .models import Agent, Role
-
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from .models import Role
 
 
 class AuthenticationError(RuntimeError):
@@ -19,39 +15,59 @@ class AuthenticationError(RuntimeError):
 
 
 class AuthorizationService:
-    """Simple RBAC service supporting OAuth2 and SSO tokens."""
+    """Firebase-backed authentication helper used by the API surface."""
 
     def __init__(self) -> None:
-        self._config = get_config()
-        self._signing_key = self._config.signing_key
+        config = get_config()
+        self._project_id = config.firebase_project_id
+        self._issuer = f"https://securetoken.google.com/{self._project_id}"
+        self._emulator_mode = config.firebase_emulator_mode
+        if self._emulator_mode:
+            self._algorithm = "HS256"
+            self._verify_key = config.firebase_emulator_jwt_secret
+        else:
+            if not config.firebase_service_account_cert:
+                raise AuthenticationError(
+                    "Provide CALL_CENTER_FIREBASE_SERVICE_ACCOUNT_CERT when emulator mode is disabled"
+                )
+            self._algorithm = "RS256"
+            self._verify_key = config.firebase_service_account_cert.replace("\\n", "\n")
 
-    def issue_token(self, *, subject: str, roles: Iterable[Role], expires_in: int = 3600) -> str:
+    def issue_token(self, *, uid: str, roles: Iterable[Role], expires_in: int = 3600) -> str:
+        """Mint an emulator-friendly Firebase token for tests and demos."""
+
+        if not self._emulator_mode:
+            raise AuthenticationError("Token minting is only supported in emulator mode")
+
         now = datetime.now(tz=timezone.utc)
-        payload = {
-            "sub": subject,
-            "roles": [role.value for role in roles],
+        payload: Dict[str, object] = {
+            "sub": uid,
+            "uid": uid,
+            "iss": self._issuer,
+            "aud": self._project_id,
             "iat": int(now.timestamp()),
             "exp": int((now + timedelta(seconds=expires_in)).timestamp()),
+            "roles": [role.value for role in roles],
         }
-        return jwt.encode(payload, self._signing_key, algorithm="HS256")
+        return jwt.encode(payload, self._verify_key, algorithm=self._algorithm)
 
-    def verify_token(self, token: str) -> Dict[str, str]:
+    def verify_token(self, token: str) -> Dict[str, object]:
+        """Validate a Firebase ID token and return the decoded claims."""
+
         try:
-            payload = jwt.decode(token, self._signing_key, algorithms=["HS256"])
+            payload = jwt.decode(
+                token,
+                self._verify_key,
+                algorithms=[self._algorithm],
+                audience=self._project_id,
+            )
         except JWTError as exc:  # pragma: no cover - defensive branch
-            raise AuthenticationError("Invalid authentication token") from exc
+            raise AuthenticationError("Invalid Firebase ID token") from exc
+
+        if payload.get("iss") != self._issuer:
+            raise AuthenticationError("Token issuer mismatch")
+
         return payload
-
-    def authenticate_agent(self, agent: Agent, password: str) -> str:
-        if not agent.password_hash:
-            raise AuthenticationError("Agent password not configured")
-        if not pwd_context.verify(password, agent.password_hash):
-            raise AuthenticationError("Invalid credentials")
-        return self.issue_token(subject=agent.agent_id, roles=[agent.role])
-
-    @staticmethod
-    def hash_password(password: str) -> str:
-        return pwd_context.hash(password)
 
 
 class AuditLogger:
@@ -74,5 +90,5 @@ class AuditLogger:
         return list(self._entries)
 
 
-__all__ = ["AuthenticationError", "AuthorizationService", "AuditLogger", "pwd_context"]
+__all__ = ["AuthenticationError", "AuthorizationService", "AuditLogger"]
 

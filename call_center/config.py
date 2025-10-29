@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Optional
 
 from pydantic import AnyHttpUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -26,18 +25,26 @@ class AppConfig(BaseSettings):
         default=True,
         description="Expose Prometheus metrics endpoint when True.",
     )
-    twilio_account_sid: Optional[str] = Field(default=None, description="Twilio account SID")
-    twilio_auth_token: Optional[str] = Field(default=None, description="Twilio auth token")
-    twilio_base_url: AnyHttpUrl | None = Field(
-        default="https://api.twilio.com/2010-04-01", description="Twilio REST API base URL"
+    firebase_project_id: str = Field(
+        default="call-center-demo",
+        description="Firebase project identifier used for authentication",
     )
-    zendesk_subdomain: Optional[str] = Field(default=None)
-    zendesk_email: Optional[str] = Field(default=None)
-    zendesk_api_token: Optional[str] = Field(default=None)
-    salesforce_instance_url: Optional[AnyHttpUrl] = Field(default=None)
-    salesforce_client_id: Optional[str] = Field(default=None)
-    salesforce_client_secret: Optional[str] = Field(default=None)
-    salesforce_refresh_token: Optional[str] = Field(default=None)
+    firebase_web_api_key: str = Field(
+        default="demo-api-key",
+        description="Firebase Web API key used by the front-end",
+    )
+    firebase_emulator_mode: bool = Field(
+        default=True,
+        description="When True, tokens are verified using the local emulator secret instead of remote JWKS",
+    )
+    firebase_emulator_jwt_secret: str = Field(
+        default="firebase-emulator-secret",
+        description="Shared secret used to mint and verify emulator ID tokens",
+    )
+    firebase_service_account_cert: str | None = Field(
+        default=None,
+        description="PEM-encoded certificate for verifying Firebase tokens when not using the emulator",
+    )
     recording_retention_days: int = Field(
         default=60,
         description="Default recording retention policy in days if queue-specific value not provided.",

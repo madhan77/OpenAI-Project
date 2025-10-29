@@ -70,6 +70,12 @@ class CallCenter:
         queue.overflow_queue = overflow_queue
         self._audit("queue_overflow_updated", queue=queue.name, overflow=overflow_queue)
 
+    def find_agent_by_uid(self, firebase_uid: str) -> Optional[Agent]:
+        for agent in self.agents.values():
+            if agent.firebase_uid == firebase_uid:
+                return agent
+        return None
+
     # ------------------------------------------------------------------
     # Interaction lifecycle
     # ------------------------------------------------------------------

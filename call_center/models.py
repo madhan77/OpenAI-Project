@@ -53,8 +53,7 @@ class Agent:
     active_chat_interactions: Set[str] = field(default_factory=set)
     pending_wrap_up: Dict[str, str] = field(default_factory=dict)
     max_chat_concurrency: int = 2
-
-    password_hash: Optional[str] = None
+    firebase_uid: Optional[str] = None
 
     def set_status(self, status: AgentStatus) -> None:
         self.status = status
@@ -118,6 +117,7 @@ class Agent:
             "skills": sorted(self.skills),
             "status": self.status.value,
             "last_status_change": self.last_status_change.isoformat(),
+            "firebase_uid": self.firebase_uid,
         }
 
 

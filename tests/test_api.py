@@ -1,8 +1,11 @@
 from fastapi.testclient import TestClient
 
 from call_center import Agent, AgentStatus, Queue, Role
-from call_center.api.server import app
 from call_center.api.dependencies import get_auth_service, get_call_center
+from call_center.api.server import app
+
+
+ADMIN_UID = "firebase-admin"
 
 
 def setup_module(_) -> None:
@@ -17,25 +20,31 @@ def setup_module(_) -> None:
                 role=Role.ADMIN,
                 skills={"voice"},
                 status=AgentStatus.AVAILABLE,
+                firebase_uid=ADMIN_UID,
             )
         )
+    else:
+        center.agents["admin"].firebase_uid = ADMIN_UID
+
+
+def _mint_token(agent_id: str) -> str:
+    center = get_call_center()
     auth_service = get_auth_service()
-    center.agents["admin"].password_hash = auth_service.hash_password("adminpass")
+    agent = center.agents[agent_id]
+    assert agent.firebase_uid, "Agent must have a Firebase UID for tests"
+    return auth_service.issue_token(uid=agent.firebase_uid, roles=[agent.role])
 
 
-def _login(client: TestClient, username: str, password: str) -> str:
-    response = client.post(
-        "/api/auth/token",
-        data={"username": username, "password": password, "grant_type": "password"},
-        headers={"content-type": "application/x-www-form-urlencoded"},
-    )
+def _login(client: TestClient, agent_id: str) -> str:
+    token = _mint_token(agent_id)
+    response = client.post("/api/auth/firebase", json={"id_token": token})
     assert response.status_code == 200, response.text
     return response.json()["access_token"]
 
 
 def test_agent_lifecycle_via_api() -> None:
     client = TestClient(app)
-    token = _login(client, "admin", "adminpass")
+    token = _login(client, "admin")
 
     payload = {
         "agent_id": "agent-1",
@@ -48,13 +57,13 @@ def test_agent_lifecycle_via_api() -> None:
     assert response.status_code == 201, response.text
 
     response = client.post(
-        "/api/agents/agent-1/password",
-        json={"password": "agentpass"},
+        "/api/agents/agent-1/identity",
+        json={"firebase_uid": "firebase-agent-1"},
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200, response.text
 
-    agent_token = _login(client, "agent-1", "agentpass")
+    agent_token = _login(client, "agent-1")
     response = client.post(
         "/api/agents/agent-1/status",
         json="on_call",
@@ -66,7 +75,7 @@ def test_agent_lifecycle_via_api() -> None:
 
 def test_interaction_routing_flow() -> None:
     client = TestClient(app)
-    token = _login(client, "admin", "adminpass")
+    token = _login(client, "admin")
 
     interaction_payload = {
         "interaction_id": "call-123",
