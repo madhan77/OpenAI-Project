@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "call-center-agent"
+version = "0.1.0"
+description = "Simplified call center agent simulation based on PRD"
+requires-python = ">=3.10"
+authors = [
+    {name = "OpenAI Project"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+dependencies = []
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-q"
+python_files = "test_*.py"
+testpaths = ["tests"]
