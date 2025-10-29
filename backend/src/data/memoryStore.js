@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mockData from './mockData.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,12 +19,13 @@ const createDefaultSummary = () => ({
   proteinGrams: 0,
   carbsGrams: 0,
   fatGrams: 0,
+  mindfulnessMinutes: 0,
   moodScore: null,
   stressLevel: null,
   energyLevel: null,
 });
 
-const createDefaultState = () => ({
+const createEmptyState = () => ({
   activities: [],
   sleepSessions: [],
   nutritionEntries: [],
@@ -44,7 +46,7 @@ const ensureStorageDir = () => {
 };
 
 const normalizeState = (rawState) => {
-  const base = createDefaultState();
+  const base = createEmptyState();
   const stateWithDefaults = {
     ...base,
     ...rawState,
@@ -77,10 +79,18 @@ const normalizeState = (rawState) => {
   return stateWithDefaults;
 };
 
+function createInitialState() {
+  const normalized = normalizeState({
+    ...(mockData ?? {}),
+  });
+  normalized.wellnessSummary = calculateWellnessSummary(normalized);
+  return normalized;
+}
+
 const loadState = () => {
   ensureStorageDir();
   if (!fs.existsSync(STORE_FILE)) {
-    const initial = createDefaultState();
+    const initial = createInitialState();
     fs.writeFileSync(STORE_FILE, JSON.stringify(initial, null, 2));
     return initial;
   }
@@ -88,13 +98,15 @@ const loadState = () => {
   try {
     const content = fs.readFileSync(STORE_FILE, 'utf-8');
     if (!content) {
-      return createDefaultState();
+      return createInitialState();
     }
     const parsed = JSON.parse(content);
-    return normalizeState(parsed);
+    const normalized = normalizeState(parsed);
+    normalized.wellnessSummary = calculateWellnessSummary(normalized);
+    return normalized;
   } catch (error) {
     console.error('Failed to read store, recreating a new one', error);
-    const initial = createDefaultState();
+    const initial = createInitialState();
     fs.writeFileSync(STORE_FILE, JSON.stringify(initial, null, 2));
     return initial;
   }
@@ -103,6 +115,7 @@ const loadState = () => {
 const saveState = (data) => {
   ensureStorageDir();
   const normalized = normalizeState(data);
+  normalized.wellnessSummary = calculateWellnessSummary(normalized);
   fs.writeFileSync(STORE_FILE, JSON.stringify(normalized, null, 2));
   state = normalized;
 };
@@ -125,7 +138,7 @@ const toNumberOrNull = (value) => {
   return Number.isNaN(numeric) ? null : numeric;
 };
 
-const calculateWellnessSummary = (data) => {
+function calculateWellnessSummary(data) {
   const activitySteps = sumBy(data.activities, (activity) => activity.steps);
   const caloriesBurned = sumBy(
     data.activities,
@@ -144,6 +157,11 @@ const calculateWellnessSummary = (data) => {
     (session) => session.durationMinutes
   );
   const sleepHours = sleepMinutes / 60;
+
+  const mindfulnessMinutes = sumBy(
+    data.mindfulnessSessions,
+    (session) => session.durationMinutes
+  );
 
   const restingSamples = data.heartRateSamples.filter((sample) => {
     if (!sample.context) {
@@ -175,11 +193,13 @@ const calculateWellnessSummary = (data) => {
     proteinGrams: Math.round(proteinGrams * 100) / 100,
     carbsGrams: Math.round(carbsGrams * 100) / 100,
     fatGrams: Math.round(fatGrams * 100) / 100,
+    mindfulnessMinutes: Math.round(mindfulnessMinutes),
     moodScore: toNumberOrNull(lastCheckIn?.moodScore),
     stressLevel: toNumberOrNull(lastCheckIn?.stressLevel),
     energyLevel: toNumberOrNull(lastCheckIn?.energyLevel),
   };
-};
+}
+
 
 const withState = (mutator, { recalc = true } = {}) => {
   const data = getState();

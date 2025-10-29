@@ -28,7 +28,8 @@ The `backend` directory contains a Node.js + Express + Apollo Server project tha
 ### Data Persistence
 
 - Logged activity, recovery, and wellness data is written to `backend/storage/store.json`. The file is automatically created the first time the service receives a mutation.
-- The storage directory already ignores `store.json` in git so you can safely reset the datastore by deleting the file.
+- On first boot the datastore is pre-populated with a curated mock dataset that spans recent activities, recovery logs, nutrition, hydration, and goals so the dashboard has meaningful data without manual entry.
+- The storage directory already ignores `store.json` in git so you can safely reset the datastore by deleting the file (a fresh copy of the mock data will be generated on the next start).
 - Because the service aggregates the complete dataset after each write, manual edits to `store.json` should maintain the expected property shapes (ISO date strings, numeric metrics) to avoid inconsistent summaries.
 
 ### GraphQL Overview
@@ -50,6 +51,7 @@ query WellnessDashboard {
     proteinGrams
     carbsGrams
     fatGrams
+    mindfulnessMinutes
     moodScore
     stressLevel
     energyLevel
@@ -136,10 +138,11 @@ The `frontend` directory houses a Vite + React + TypeScript single-page applicat
    cd frontend
    npm install
    ```
-2. Configure environment variables (optional):
+2. Configure environment variables:
    ```bash
    cp .env.example .env
    # set VITE_GRAPHQL_URL if the backend is not running on http://localhost:4000/graphql
+   # populate the Firebase values (API key, auth domain, project ID, app ID, etc.) from your account
    ```
 3. Run the development server:
    ```bash
@@ -150,8 +153,18 @@ The `frontend` directory houses a Vite + React + TypeScript single-page applicat
 ### Key Files
 
 - `src/services/apolloClient.ts` configures Apollo Client and targets the backend GraphQL endpoint.
+- `src/services/firebase.ts` initialises the Firebase SDK using environment configuration.
 - `src/pages/DashboardPage.tsx` issues the wellness dashboard query and orchestrates the page layout.
 - `src/components/` contains modular UI building blocks such as the app shell, summary cards, insights panel, and weekly progress grid.
+- `src/contexts/AuthContext.tsx` manages Firebase authentication state and refreshes GraphQL queries when tokens change.
+- `src/components/SignInPanel.tsx` renders the sign-in experience when no authenticated user is present.
 - `src/styles/global.css` defines the global design foundation shared across components.
 
-The frontend is intentionally lightweight to accelerate iteration; future milestones will introduce routing, authentication, richer analytics visualizations, and mobile responsiveness enhancements aligned with the product requirements.
+The frontend is intentionally lightweight to accelerate iteration; future milestones will introduce routing, richer analytics visualizations, and mobile responsiveness enhancements aligned with the product requirements.
+
+### Authentication
+
+- Firebase Authentication secures the dashboard. A signed-in Firebase user is required before any GraphQL requests are issued.
+- Populate the values in `frontend/.env` with credentials from your Firebase project (API key, auth domain, project ID, app ID, and optional bucket/messaging IDs).
+- Enable Google sign-in (or your chosen providers) inside the Firebase console. The UI currently exposes a Google sign-in button that opens the provider flow and stores the resulting ID token locally.
+- Apollo Client automatically attaches the Firebase ID token to each GraphQL request and refreshes queries after authentication changes, so backend resolvers can enforce auth once verification is added.

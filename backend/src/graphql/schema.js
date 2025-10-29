@@ -63,6 +63,7 @@ export const typeDefs = gql`
     proteinGrams: Float
     carbsGrams: Float
     fatGrams: Float
+    mindfulnessMinutes: Int
     moodScore: Float
     stressLevel: Float
     energyLevel: Float
@@ -79,6 +80,7 @@ export const typeDefs = gql`
     proteinGrams: Float
     carbsGrams: Float
     fatGrams: Float
+    mindfulnessMinutes: Int
     moodScore: Float
     stressLevel: Float
     energyLevel: Float
