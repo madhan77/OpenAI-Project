@@ -1,0 +1,11 @@
+[project]
+name = "sima"
+version = "0.1.0"
+description = "Single Issue Management App domain services"
+authors = [{ name = "OpenAI Assistant" }]
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
