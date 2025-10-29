@@ -150,6 +150,12 @@ The `frontend` directory houses a Vite + React + TypeScript single-page applicat
    ```
 4. Open the app at the URL shown in the terminal (default `http://localhost:5173`).
 
+### Accessing the App
+
+- There is currently no hosted environment for the Wellness Tracker dashboard; use the local development workflow above.
+- Once the frontend dev server is running you can sign in by visiting **http://localhost:5173** in your browser. Firebase authentication will redirect you to Google (or any enabled provider) and then back to the dashboard once complete.
+
+
 ### Key Files
 
 - `src/services/apolloClient.ts` configures Apollo Client and targets the backend GraphQL endpoint.
