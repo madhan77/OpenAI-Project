@@ -1,0 +1,52 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dashboard-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.dashboard-page__header h2 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.dashboard-page__header p {
+  margin-top: 0.4rem;
+  color: rgba(71, 85, 105, 0.9);
+}
+
+.dashboard-page__date {
+  font-size: 0.9rem;
+  color: rgba(30, 41, 59, 0.7);
+}
+
+.dashboard-page__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.dashboard-page__state {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background-color: rgba(148, 163, 184, 0.18);
+  color: #475569;
+  max-width: 320px;
+}
+
+.dashboard-page__state--error {
+  background-color: rgba(248, 113, 113, 0.2);
+  color: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .dashboard-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

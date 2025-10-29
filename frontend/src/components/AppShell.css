@@ -1,0 +1,67 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #0f172a;
+}
+
+.app-shell__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background-color: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.35);
+}
+
+.app-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app-shell__logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+}
+
+.app-shell__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(148, 163, 184, 0.96);
+}
+
+.app-shell__status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background-color: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.35);
+}
+
+.app-shell__content {
+  padding: 2rem clamp(1rem, 5vw, 4rem) 3rem;
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .app-shell__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .app-shell__content {
+    padding: 1.5rem 1rem 2rem;
+  }
+}

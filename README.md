@@ -124,3 +124,34 @@ query WellnessDashboard {
   }
 }
 ```
+
+## Frontend Web Client
+
+The `frontend` directory houses a Vite + React + TypeScript single-page application that visualizes the API. It connects to the GraphQL backend using Apollo Client and includes an initial dashboard experience with daily summary cards, AI-powered insights, and a weekly progress grid.
+
+### Getting Started
+
+1. Install dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Configure environment variables (optional):
+   ```bash
+   cp .env.example .env
+   # set VITE_GRAPHQL_URL if the backend is not running on http://localhost:4000/graphql
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open the app at the URL shown in the terminal (default `http://localhost:5173`).
+
+### Key Files
+
+- `src/services/apolloClient.ts` configures Apollo Client and targets the backend GraphQL endpoint.
+- `src/pages/DashboardPage.tsx` issues the wellness dashboard query and orchestrates the page layout.
+- `src/components/` contains modular UI building blocks such as the app shell, summary cards, insights panel, and weekly progress grid.
+- `src/styles/global.css` defines the global design foundation shared across components.
+
+The frontend is intentionally lightweight to accelerate iteration; future milestones will introduce routing, authentication, richer analytics visualizations, and mobile responsiveness enhancements aligned with the product requirements.
