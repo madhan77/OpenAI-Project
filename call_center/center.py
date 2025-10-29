@@ -4,6 +4,7 @@ from collections import defaultdict, deque
 from datetime import datetime
 from typing import Deque, Dict, Iterable, List, Optional, Tuple
 
+from .compliance import ComplianceService, EncryptedRecording
 from .models import (
     Agent,
     AgentStatus,
@@ -33,6 +34,8 @@ class CallCenter:
         self.interactions: Dict[str, Interaction] = {}
         self.interaction_assignments: Dict[str, str] = {}
         self.recordings: Dict[str, Recording] = {}
+        self.archived_recordings: Dict[str, EncryptedRecording] = {}
+        self.compliance = ComplianceService()
         self.audit_log: Deque[Tuple[datetime, str, Dict[str, str]]] = deque(maxlen=1000)
         self.supervisor_alerts: Deque[str] = deque(maxlen=50)
 
@@ -79,6 +82,7 @@ class CallCenter:
             raise RoutingError(f"Queue '{queue_name}' is closed")
         queue.enqueue(interaction)
         self.interactions[interaction.interaction_id] = interaction
+        interaction.context.setdefault("queue", queue_name)
         self._audit(
             "interaction_received",
             queue=queue_name,
@@ -210,6 +214,19 @@ class CallCenter:
         recording = self.recordings.get(interaction_id)
         if recording:
             recording.close()
+            payload = f"Recording metadata:{interaction_id}:{wrap_up_code}".encode()
+            queue_name = (
+                self.interactions[interaction_id].context.get("queue")
+                if interaction_id in self.interactions
+                else None
+            )
+            retention_days = None
+            if queue_name and queue_name in self.queues:
+                retention_days = self.queues[queue_name].recording_retention_days
+            encrypted = self.compliance.encrypt_recording(
+                interaction_id, payload, retention_days=retention_days
+            )
+            self.archived_recordings[interaction_id] = encrypted
 
         self._audit(
             "interaction_completed",
@@ -217,6 +234,13 @@ class CallCenter:
             agent_id=agent.agent_id,
             wrap_up_code=wrap_up_code,
         )
+
+    def retrieve_recording(self, interaction_id: str) -> bytes:
+        try:
+            record = self.archived_recordings[interaction_id]
+        except KeyError as exc:  # pragma: no cover - defensive
+            raise RoutingError("Recording not found") from exc
+        return self.compliance.decrypt_recording(record)
 
     def finalize_wrap_up(self, agent_id: str, interaction_id: Optional[str] = None) -> None:
         agent = self._get_agent(agent_id)

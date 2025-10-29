@@ -1,46 +1,54 @@
-# OpenAI-Project
-OpenAI Project
+# OpenAI-Project Call Center Platform
 
-## Call Center Agent Application
+## Overview
 
-This repository contains a simplified in-memory implementation of the Call Center
-Agent application described in [`docs/call_center_prd.md`](docs/call_center_prd.md).
-It focuses on the MVP capabilities outlined in the PRD, including skills-based
-routing, wrap-up enforcement, supervisor tooling, and quality controls.
+This repository delivers a production-aligned call center platform implementing the capabilities defined in [`docs/call_center_prd.md`](docs/call_center_prd.md). It now includes:
 
-### Features
+- **FastAPI services** that expose authenticated REST APIs for agent management, interaction routing, dashboards, reporting exports, and webhook integrations.
+- **Omnichannel integrations** with Twilio Voice, hosted web chat, mobile messaging, Salesforce, and Zendesk via dedicated gateway classes in `call_center/integrations`.
+- **Compliance and security controls** including OAuth2/SAML-friendly token issuance, encrypted recording retention, transcript redaction, structured audit logging, and configurable retention policies.
+- **Persistent storage** built on SQLAlchemy with async SQLite for quick starts and compatibility with PostgreSQL in production deployments.
+- **Responsive supervisor and agent desktop UI** served through FastAPI with accessible styling, queue visualizations, and live interaction status.
+- **Observability hooks** covering Prometheus metrics, structured JSON logging, and environment-driven configuration management.
 
-- Register agents with roles, skills, and presence states.
-- Configure queues with priorities, business rules, and wait time thresholds.
-- Receive and route voice/chat interactions using multiple routing strategies.
-- Transfer interactions between agents or queues, enforcing wrap-up codes before
-  agents return to an available status.
-- Support concurrent chat handling (up to two simultaneous chats per agent by
-  default) while preserving wrap-up compliance gates.
-- Generate supervisor dashboard snapshots and queue breach alerts.
-- Schedule supervisor reports and manage recording redactions for QA workflows.
+## Getting Started
 
-### Quick Start
+1. Create and activate a Python 3.11+ virtual environment, then install the project with development extras:
 
-Create a virtual environment with Python 3.10+ and install the package in
-editable mode if desired:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -e .[dev]
+   ```
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
-```
+2. Populate credentials for external providers via environment variables or a `.env` file using the prefixes defined in `call_center/config.py` (for example, `CALL_CENTER_TWILIO_ACCOUNT_SID`, `CALL_CENTER_SALESFORCE_CLIENT_ID`).
 
-Run the demo script to see a minimal workflow:
+3. Launch the API and UI server:
 
-```bash
-python -m call_center.demo
-```
+   ```bash
+   uvicorn call_center.api.server:app --reload
+   ```
 
-### Testing
+4. Create an administrator through the `/api/agents` endpoint, set a password using `/api/agents/{id}/password`, request an OAuth token from `/api/auth/token`, and then open `http://localhost:8000/` to access the supervisor console.
 
-Execute the automated test suite with `pytest`:
+## Metrics and Observability
 
-```bash
-pytest
-```
+- Prometheus metrics are exposed at `/metrics` when `CALL_CENTER_PROMETHEUS_ENABLED=true` (default).
+- Structured logs are emitted in JSON via `structlog` and can be forwarded to your observability stack.
+- Audit entries are available through the `AuditLogger` utility for compliance reviews.
+
+## Additional Tooling
+
+- The in-memory CLI demo remains available for quick experimentation:
+
+  ```bash
+  python -m call_center.demo
+  ```
+
+- Automated tests validate routing, integrations, and compliance behaviors:
+
+  ```bash
+  pytest
+  ```
+
+Refer to the PRD for the full scope and to `docs/` for supplemental documentation.

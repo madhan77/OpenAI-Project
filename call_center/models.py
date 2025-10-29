@@ -54,6 +54,8 @@ class Agent:
     pending_wrap_up: Dict[str, str] = field(default_factory=dict)
     max_chat_concurrency: int = 2
 
+    password_hash: Optional[str] = None
+
     def set_status(self, status: AgentStatus) -> None:
         self.status = status
         self.last_status_change = datetime.utcnow()
@@ -108,6 +110,16 @@ class Agent:
 
         return bool(self.active_voice_interaction_id or self.active_chat_interactions)
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "agent_id": self.agent_id,
+            "display_name": self.name,
+            "role": self.role.value,
+            "skills": sorted(self.skills),
+            "status": self.status.value,
+            "last_status_change": self.last_status_change.isoformat(),
+        }
+
 
 @dataclass(order=True)
 class Interaction:
@@ -131,6 +143,18 @@ class Interaction:
     def add_note(self, note: str) -> None:
         timestamp = datetime.utcnow().isoformat(timespec="seconds")
         self.notes.append(f"[{timestamp}] {note}")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "interaction_id": self.interaction_id,
+            "channel": self.channel.value,
+            "customer_name": self.customer_name,
+            "required_skills": sorted(self.required_skills),
+            "priority": self.priority,
+            "created_at": self.created_at.isoformat(),
+            "notes": list(self.notes),
+            "wrap_up_code": self.wrap_up_code,
+        }
 
 
 @dataclass
@@ -162,6 +186,7 @@ class Queue:
     ivr_path: Optional[Sequence[str]] = None
     interactions: List[Interaction] = field(default_factory=list)
     next_agent_index: int = 0
+    recording_retention_days: int = 60
 
     def enqueue(self, interaction: Interaction) -> None:
         self.interactions.append(interaction)
@@ -185,6 +210,19 @@ class Queue:
 
     def __len__(self) -> int:
         return len(self.interactions)
+
+    @property
+    def size(self) -> int:
+        return len(self.interactions)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "name": self.name,
+            "skills": sorted(self.skills),
+            "priority": self.priority,
+            "open": self.is_open(),
+            "size": self.size,
+        }
 
 
 @dataclass

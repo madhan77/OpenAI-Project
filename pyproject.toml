@@ -6,13 +6,38 @@ build-backend = "setuptools.build_meta"
 name = "call-center-agent"
 version = "0.1.0"
 description = "Simplified call center agent simulation based on PRD"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     {name = "OpenAI Project"}
 ]
 readme = "README.md"
 license = {text = "MIT"}
-dependencies = []
+dependencies = [
+    "aiosqlite>=0.19",
+    "cryptography>=42.0",
+    "fastapi>=0.110",
+    "httpx>=0.27",
+    "jinja2>=3.1",
+    "prometheus-client>=0.20",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "python-dateutil>=2.9",
+    "python-jose[cryptography]>=3.3",
+    "passlib[bcrypt]>=1.7",
+    "sqlalchemy[asyncio]>=2.0",
+    "starlette>=0.37",
+    "structlog>=24.1",
+    "typer>=0.12",
+    "uvicorn>=0.29",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.9",
+    "pytest>=8.0",
+    "respx>=0.21",
+    "types-python-dateutil",
+]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

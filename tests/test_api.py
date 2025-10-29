@@ -1,0 +1,92 @@
+from fastapi.testclient import TestClient
+
+from call_center import Agent, AgentStatus, Queue, Role
+from call_center.api.server import app
+from call_center.api.dependencies import get_auth_service, get_call_center
+
+
+def setup_module(_) -> None:
+    center = get_call_center()
+    if "voice" not in center.queues:
+        center.create_queue(Queue(name="voice", skills={"voice"}, priority=1))
+    if "admin" not in center.agents:
+        center.register_agent(
+            Agent(
+                agent_id="admin",
+                name="Admin",
+                role=Role.ADMIN,
+                skills={"voice"},
+                status=AgentStatus.AVAILABLE,
+            )
+        )
+    auth_service = get_auth_service()
+    center.agents["admin"].password_hash = auth_service.hash_password("adminpass")
+
+
+def _login(client: TestClient, username: str, password: str) -> str:
+    response = client.post(
+        "/api/auth/token",
+        data={"username": username, "password": password, "grant_type": "password"},
+        headers={"content-type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 200, response.text
+    return response.json()["access_token"]
+
+
+def test_agent_lifecycle_via_api() -> None:
+    client = TestClient(app)
+    token = _login(client, "admin", "adminpass")
+
+    payload = {
+        "agent_id": "agent-1",
+        "name": "Avery",
+        "role": "agent",
+        "skills": ["voice"],
+        "status": "available",
+    }
+    response = client.post("/api/agents", json=payload, headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 201, response.text
+
+    response = client.post(
+        "/api/agents/agent-1/password",
+        json={"password": "agentpass"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200, response.text
+
+    agent_token = _login(client, "agent-1", "agentpass")
+    response = client.post(
+        "/api/agents/agent-1/status",
+        json="on_call",
+        headers={"Authorization": f"Bearer {agent_token}"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["status"] == "on_call"
+
+
+def test_interaction_routing_flow() -> None:
+    client = TestClient(app)
+    token = _login(client, "admin", "adminpass")
+
+    interaction_payload = {
+        "interaction_id": "call-123",
+        "channel": "voice",
+        "customer_name": "Taylor",
+        "required_skills": ["voice"],
+        "priority": 1,
+    }
+    response = client.post(
+        "/api/interactions?queue=voice",
+        json=interaction_payload,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 202, response.text
+
+    response = client.post(
+        "/api/interactions/route",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["interaction"]["interaction_id"] == "call-123"
+    assert body["agent"]["agent_id"] in {"admin", "agent-1"}

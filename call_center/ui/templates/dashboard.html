@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Call Center Control Room</title>
+    <link rel="stylesheet" href="/ui/static/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Call Center Control Room</h1>
+      <p>Signed in as {{ user["sub"] }} (roles: {{ user["roles"] | join(", ") }})</p>
+    </header>
+    <main>
+      <section class="panel">
+        <h2>Agents</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Skills</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for agent in agents %}
+            <tr class="status-{{ agent.status.value }}">
+              <td>{{ agent.agent_id }}</td>
+              <td>{{ agent.name }}</td>
+              <td>{{ agent.status.value }}</td>
+              <td>{{ agent.skills | join(', ') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      <section class="panel">
+        <h2>Queues</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Priority</th>
+              <th>Open</th>
+              <th>Waiting</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for queue in queues %}
+            <tr>
+              <td>{{ queue.name }}</td>
+              <td>{{ queue.priority }}</td>
+              <td>{{ 'Yes' if queue.is_open() else 'No' }}</td>
+              <td>{{ queue.size }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      <section class="panel">
+        <h2>Active Interactions</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Channel</th>
+              <th>Priority</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for interaction in interactions %}
+            <tr>
+              <td>{{ interaction.interaction_id }}</td>
+              <td>{{ interaction.channel.value }}</td>
+              <td>{{ interaction.priority }}</td>
+              <td>{{ interaction.status }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>
