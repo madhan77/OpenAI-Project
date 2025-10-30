@@ -31,7 +31,11 @@ The prototype dashboard renders mock operational data so that the UI can be deve
    npm run dev
    ```
 
-3. Visit the printed URL (default `http://localhost:5173`) to use the dashboard with mock incident data.
+3. Visit the printed URL (default [`http://localhost:5173`](http://localhost:5173)) to use the dashboard with mock incident data.
+
+### Login link
+
+- Once the dev server is running, share [`http://localhost:5173/login`](http://localhost:5173/login) with stakeholders who need direct access to the Firebase login screen.
 
 The dashboard currently reads from static mock data located in `frontend/src/data/mockData.ts`. Replace this module with live API calls once the backend endpoints are ready.
 

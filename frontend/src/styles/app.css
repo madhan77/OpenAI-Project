@@ -29,6 +29,18 @@
   color: #e2e8f0;
 }
 
+.app-state__login-link {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #cbd5f5;
+}
+
+.app-state__login-link a {
+  color: #38bdf8;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
 .app-state__error {
   margin: 0;
   color: #fca5a5;

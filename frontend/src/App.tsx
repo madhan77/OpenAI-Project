@@ -44,6 +44,17 @@ export default function App() {
     []
   );
 
+  const loginLink = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+    const url = new URL(window.location.href);
+    url.pathname = '/login';
+    url.search = '';
+    url.hash = '';
+    return url.toString();
+  }, []);
+
   const handleSignIn = async () => {
     if (!authBundle) {
       return;
@@ -116,6 +127,14 @@ VITE_FIREBASE_APP_ID=...`}
             {issueCounts.total} mock incidents · {issueCounts.critical} critical
           </p>
         </div>
+        {loginLink && (
+          <p className="app-state__login-link">
+            Shareable login link:{' '}
+            <a href={loginLink} target="_blank" rel="noopener noreferrer">
+              {loginLink}
+            </a>
+          </p>
+        )}
       </div>
     );
   }
