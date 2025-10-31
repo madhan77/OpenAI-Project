@@ -14,16 +14,17 @@ The prototype dashboard renders mock operational data so that the UI can be deve
 
 ### Setup
 
-1. Copy the Firebase web credentials for your project and add them to `frontend/.env.local`:
+1. Follow the [Firebase setup guide](docs/firebase-setup.md) to create/configure your project and obtain the web credentials.
 
-   ```env
-   VITE_FIREBASE_API_KEY=your-api-key
-   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your-project-id
-   VITE_FIREBASE_APP_ID=your-app-id
+2. Copy the example environment file and populate it with the values from your Firebase console:
+
+   ```bash
+   cp frontend/.env.example frontend/.env.local
    ```
 
-2. Install dependencies and start the development server:
+   Update `.env.local` with the keys for your Firebase web app (API key, auth domain, project ID, and app ID).
+
+3. Install dependencies and start the development server:
 
    ```bash
    cd frontend
@@ -31,7 +32,7 @@ The prototype dashboard renders mock operational data so that the UI can be deve
    npm run dev
    ```
 
-3. Visit the printed URL (default [`http://localhost:5173`](http://localhost:5173)) to use the dashboard with mock incident data.
+4. Visit the printed URL (default [`http://localhost:5173`](http://localhost:5173)) to use the dashboard with mock incident data.
 
 ### Login link
 
