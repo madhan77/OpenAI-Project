@@ -61,6 +61,28 @@ includes a lightweight Firebase Authentication integration. Provide a Firebase I
 alongside your service account credentials and project ID, and the CLI will verify the
 token before running any workflows.
 
+> **Shared testing project**
+>
+> The repository ships with a `.env.example` file that contains web client settings for
+> the shared Firebase project (`open-ai-project-723a7`). Copy it to `.env` (or source it
+> in your shell) when experimenting with web or mobile prototypes that sit on top of this
+> backend:
+>
+> ```bash
+> cp .env.example .env
+> source .env
+> ```
+>
+> ```text
+> VITE_FIREBASE_API_KEY="AIzaSyB-bo4wgmeLm0Wg1eTiiFe69l6fuXRGCns"
+> VITE_FIREBASE_AUTH_DOMAIN="open-ai-project-723a7.firebaseapp.com"
+> VITE_FIREBASE_PROJECT_ID="open-ai-project-723a7"
+> VITE_FIREBASE_APP_ID="project-299553862015"
+> ```
+>
+> These values are safe to check into source control and allow the bundled CLI (or any
+> future Vite-based UI) to authenticate against the same Firebase tenant.
+
 Environment variables offer an alternative to passing command-line flags:
 
 ```bash
