@@ -12,6 +12,7 @@ import { mockClaims } from "./mock-data.js";
 let firebaseAuth = null;
 let selectedClaimId = null;
 let listenersAttached = false;
+let isDemoSession = false;
 
 const loginForm = document.getElementById("login-form");
 const emailInput = document.getElementById("email");
@@ -19,6 +20,7 @@ const passwordInput = document.getElementById("password");
 const userInfo = document.getElementById("user-info");
 const userEmail = document.getElementById("user-email");
 const signOutButton = document.getElementById("sign-out");
+const demoLoginButton = document.getElementById("demo-login");
 
 const dashboard = document.getElementById("dashboard");
 const authGate = document.getElementById("auth-gate");
@@ -185,6 +187,28 @@ function resetDashboard() {
   selectedClaimId = null;
 }
 
+function enterDemoMode() {
+  isDemoSession = true;
+  firebaseAuth = null;
+  userEmail.textContent = "demo.reviewer@openai.health (Demo)";
+  loginForm.classList.add("hidden");
+  userInfo.classList.remove("hidden");
+  authGate.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+  statusFilter.value = "all";
+  searchInput.value = "";
+  filterClaims();
+}
+
+function exitDemoMode() {
+  isDemoSession = false;
+  loginForm.classList.remove("hidden");
+  userInfo.classList.add("hidden");
+  authGate.classList.remove("hidden");
+  dashboard.classList.add("hidden");
+  resetDashboard();
+}
+
 function showConfigError(message) {
   authGate.innerHTML = `
     <div class="card">
@@ -194,13 +218,11 @@ function showConfigError(message) {
         Provide Firebase credentials via <code>portal/firebase-config.json</code> or
         <code>portal/firebase-config.local.js</code> and reload the page.
       </p>
+      <p>You can also select <strong>Use Demo Mode</strong> to explore the mock workflow without signing in.</p>
     </div>
   `;
   authGate.classList.remove("hidden");
-  loginForm.classList.add("hidden");
-  userInfo.classList.add("hidden");
-  dashboard.classList.add("hidden");
-  resetDashboard();
+  exitDemoMode();
 }
 
 function attachEventListeners() {
@@ -227,7 +249,13 @@ function attachEventListeners() {
   });
 
   signOutButton.addEventListener("click", () => {
+    if (isDemoSession) {
+      exitDemoMode();
+      return;
+    }
+
     if (!firebaseAuth) {
+      exitDemoMode();
       return;
     }
     signOut(firebaseAuth).catch((error) => alert(error.message));
@@ -236,10 +264,20 @@ function attachEventListeners() {
   statusFilter.addEventListener("change", filterClaims);
   searchInput.addEventListener("input", filterClaims);
 
+  if (demoLoginButton) {
+    demoLoginButton.addEventListener("click", () => {
+      enterDemoMode();
+    });
+  }
+
   listenersAttached = true;
 }
 
 function handleAuthState(user) {
+  if (isDemoSession) {
+    return;
+  }
+
   if (user) {
     userEmail.textContent = user.email || user.uid;
     loginForm.classList.add("hidden");
@@ -296,5 +334,6 @@ async function bootstrap() {
   }
 }
 
+attachEventListeners();
 resetDashboard();
 bootstrap();

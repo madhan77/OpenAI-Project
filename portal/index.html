@@ -13,7 +13,10 @@
       <form id="login-form" class="login-form" autocomplete="on">
         <input type="email" id="email" placeholder="Email" required />
         <input type="password" id="password" placeholder="Password" required />
-        <button type="submit">Sign In</button>
+        <div class="login-actions">
+          <button type="submit">Sign In</button>
+          <button type="button" id="demo-login" class="secondary">Use Demo Mode</button>
+        </div>
       </form>
       <div id="user-info" class="user-info hidden">
         <span id="user-email"></span>

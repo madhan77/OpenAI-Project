@@ -43,6 +43,7 @@ This repository contains a reference implementation of a health claims processin
    The lightweight dev server will read your `.env` file and host the portal at `http://localhost:5173`. (You can still use any static web server if you prefer; just ensure Firebase credentials are provided via JSON or a custom script.)
 3. **Sign in and explore**
    - Authenticate with a user provisioned in your Firebase project.
+   - Alternatively, click **Use Demo Mode** to explore the portal with mock data and no authentication (ideal when credentials are unavailable during review).
    - Review the mock claim queue, detailed breakdowns, and summary metrics that mirror the backend workflow outputs.
 
 ## Portal Login Link

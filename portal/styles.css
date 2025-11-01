@@ -46,6 +46,12 @@ body {
 .login-form {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
+}
+
+.login-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .login-form input {
@@ -63,6 +69,16 @@ body {
   border-radius: 0.5rem;
   cursor: pointer;
   font-weight: 600;
+}
+
+.login-form .secondary {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.login-form .secondary:hover {
+  background: rgba(0, 82, 204, 0.08);
 }
 
 .login-form button:hover,
@@ -243,6 +259,13 @@ tr.selected {
 @media (max-width: 768px) {
   .login-form {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .login-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   }
 
   .app-header,
