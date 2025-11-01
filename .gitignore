@@ -1,0 +1,5 @@
+# Firebase configuration overrides (keep credentials private)
+portal/firebase-config.local.js
+portal/firebase-config.json
+portal/.env
+portal/.env.local

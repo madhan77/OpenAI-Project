@@ -1,0 +1,9 @@
+{
+  "name": "claims-reviewer-portal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static reviewer portal for the health claims processing app",
+  "scripts": {
+    "start": "node dev-server.js"
+  }
+}
