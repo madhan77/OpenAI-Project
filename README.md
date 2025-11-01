@@ -29,7 +29,9 @@ This repository delivers a production-aligned call center platform implementing 
    uvicorn call_center.api.server:app --reload
    ```
 
-4. Create an administrator through the `/api/agents` endpoint, link the agent to a Firebase UID via `/api/agents/{id}/identity`, mint an emulator token with the provided utilities or Firebase, exchange it at `/api/auth/firebase`, and then open `http://localhost:8000/` to access the supervisor console.
+4. Create an administrator through the `/api/agents` endpoint, link the agent to a Firebase UID via `/api/agents/{id}/identity`, and start the Firebase Auth emulator (or configure your live Firebase project).
+
+5. Visit `http://localhost:8000/login` to sign in with your Firebase credentials. Upon successful authentication you will be redirected to `http://localhost:8000/` with a bearer token attached to the request.
 
 ## Metrics and Observability
 

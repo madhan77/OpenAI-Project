@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from ..api.dependencies import get_auth_service, get_call_center
+from ..config import get_config
 
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
@@ -16,6 +17,17 @@ def register_ui(app: FastAPI) -> None:
     router = APIRouter()
 
     auth_service = get_auth_service()
+
+    @router.get("/login", response_class=HTMLResponse)
+    async def login(request: Request) -> HTMLResponse:
+        config = get_config()
+        context = {
+            "request": request,
+            "firebase_project_id": config.firebase_project_id,
+            "firebase_api_key": config.firebase_web_api_key,
+            "firebase_emulator_mode": config.firebase_emulator_mode,
+        }
+        return templates.TemplateResponse("login.html", context)
 
     @router.get("/", response_class=HTMLResponse)
     async def dashboard(

@@ -6,6 +6,16 @@ body {
   padding: 0;
 }
 
+body.login {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, rgba(49, 209, 255, 0.25), transparent 55%),
+    #0b1725;
+  padding: 1.5rem;
+}
+
 header {
   background: linear-gradient(135deg, #1d6ff2, #31d1ff);
   padding: 1.5rem 2rem;
@@ -35,6 +45,54 @@ main {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  }
+
+.panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.panel input {
+  border-radius: 8px;
+  border: none;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+}
+
+.panel input:focus {
+  outline: 2px solid rgba(49, 209, 255, 0.65);
+}
+
+.panel button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #1d6ff2, #31d1ff);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.panel button:hover,
+.panel button:focus {
+  transform: translateY(-1px);
+}
+
+.panel .status {
+  min-height: 1.5rem;
+  margin-top: 0.5rem;
+  color: #31d1ff;
+}
+
+.panel .notice {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
 }
 
 .panel h2 {

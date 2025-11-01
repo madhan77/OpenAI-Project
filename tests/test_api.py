@@ -99,3 +99,13 @@ def test_interaction_routing_flow() -> None:
     body = response.json()
     assert body["interaction"]["interaction_id"] == "call-123"
     assert body["agent"]["agent_id"] in {"admin", "agent-1"}
+
+
+def test_login_page_serves_firebase_config() -> None:
+    client = TestClient(app)
+    response = client.get("/login")
+    assert response.status_code == 200
+    body = response.text
+    assert "Call Center Login" in body
+    assert "firebaseapp.com" in body
+    assert "token" in body

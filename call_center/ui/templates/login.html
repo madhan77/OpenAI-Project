@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Call Center Login</title>
+    <link rel="stylesheet" href="/ui/static/style.css" />
+    <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const config = {
+          apiKey: "{{ firebase_api_key }}",
+          authDomain: "{{ firebase_project_id }}.firebaseapp.com",
+          projectId: "{{ firebase_project_id }}",
+        };
+        window.firebase.initializeApp(config);
+        const auth = window.firebase.auth();
+        {% if firebase_emulator_mode %}
+        auth.useEmulator("http://localhost:9099");
+        {% endif %}
+        const loginForm = document.querySelector("#login-form");
+        const statusEl = document.querySelector("#status");
+        loginForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const email = event.target.elements.email.value;
+          const password = event.target.elements.password.value;
+          statusEl.textContent = "Signing in...";
+          try {
+            const credential = await auth.signInWithEmailAndPassword(email, password);
+            const token = await credential.user.getIdToken();
+            const dashboardUrl = new URL(window.location.origin + "/");
+            dashboardUrl.searchParams.set("token", token);
+            window.location.assign(dashboardUrl.toString());
+          } catch (error) {
+            console.error(error);
+            statusEl.textContent = error.message || "Unable to sign in";
+          }
+        });
+      });
+    </script>
+  </head>
+  <body class="login">
+    <main class="panel">
+      <h1>Call Center Login</h1>
+      <p>
+        Sign in with your Firebase email and password to access the Call Center control room.
+        Successful authentication will redirect you to the dashboard with a bearer token.
+      </p>
+      <form id="login-form">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required />
+        <button type="submit">Sign In</button>
+      </form>
+      <p id="status" class="status"></p>
+      {% if firebase_emulator_mode %}
+      <section class="notice">
+        <h2>Emulator Mode</h2>
+        <p>
+          The application is configured to use the Firebase Authentication emulator. Create test users with:
+        </p>
+        <pre><code>firebase emulators:start --only auth</code></pre>
+        <p>Then run:</p>
+        <pre><code>firebase auth:import users.json --hash-algo=BCRYPT</code></pre>
+        <p>or use the emulator UI to add accounts.</p>
+      </section>
+      {% endif %}
+    </main>
+  </body>
+</html>
