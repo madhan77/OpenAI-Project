@@ -44,7 +44,7 @@ This repository contains a reference implementation of a health claims processin
      ```bash
      npm start
      ```
-   The lightweight dev server will read your `.env` file and host the portal at `http://localhost:5173`. (You can still use any static web server if you prefer; just ensure Firebase credentials are provided via JSON or a custom script.)
+   The lightweight dev server will read your `.env` file, host the portal at `http://localhost:5173`, and automatically open the login page in your default browser. (Set `AUTO_OPEN=false` in the same shell if you prefer to launch the browser yourself.) You can still use any static web server if you prefer; just ensure Firebase credentials are provided via JSON or a custom script.
    - Want the login link echoed back in your terminal? Run `npm run login-url` from the same directory at any time to print both the local and Firebase-hosted URLs detected from your environment settings.
    - **Common typo:** If your terminal reports `zsh: command not found: nmp`, double-check the command spelling—the Node package manager is `npm`, not `nmp`.
 3. **Sign in and explore**

@@ -2,6 +2,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const { spawn } = require("child_process");
 
 const { loadFirebaseEnv } = require("./env-utils");
 
@@ -92,6 +93,30 @@ function serveStaticFile(res, filePath) {
   });
 }
 
+function tryOpenBrowser(url) {
+  const platform = process.platform;
+  let command;
+  let args;
+
+  if (platform === "darwin") {
+    command = "open";
+    args = [url];
+  } else if (platform === "win32") {
+    command = "cmd";
+    args = ["/c", "start", "", url];
+  } else {
+    command = "xdg-open";
+    args = [url];
+  }
+
+  try {
+    const child = spawn(command, args, { stdio: "ignore", detached: true });
+    child.unref();
+  } catch (error) {
+    console.warn("Unable to automatically open browser:", error.message);
+  }
+}
+
 const server = http.createServer((req, res) => {
   if (!req.url) {
     res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
@@ -135,5 +160,9 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Reviewer portal available at http://localhost:${PORT}`);
+  const loginUrl = `http://localhost:${PORT}`;
+  console.log(`Reviewer portal available at ${loginUrl}`);
+  if (process.env.AUTO_OPEN !== "false") {
+    tryOpenBrowser(loginUrl);
+  }
 });
