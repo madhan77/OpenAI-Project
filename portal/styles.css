@@ -44,9 +44,16 @@ body {
 }
 
 .login-form {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  display: grid;
+  gap: 0.75rem;
+  align-items: stretch;
+  max-width: 420px;
+}
+
+.login-form h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .login-actions {
@@ -59,6 +66,10 @@ body {
   padding: 0.5rem 0.75rem;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 0.5rem;
+}
+
+.login-form input.hidden {
+  display: none;
 }
 
 .login-form button,
@@ -103,6 +114,27 @@ body {
 
 .login-form .google:hover {
   background: rgba(26, 115, 232, 0.08);
+}
+
+.form-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.form-switch .link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-switch .link-button:hover {
+  text-decoration: underline;
 }
 
 .login-form button:hover,

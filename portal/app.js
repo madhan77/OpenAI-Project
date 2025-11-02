@@ -3,6 +3,7 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut
@@ -16,15 +17,21 @@ let selectedClaimId = null;
 let listenersAttached = false;
 let isDemoSession = false;
 let googleProvider = null;
+let authMode = "signin";
 
 const loginForm = document.getElementById("login-form");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
+const confirmPasswordInput = document.getElementById("confirm-password");
 const userInfo = document.getElementById("user-info");
 const userEmail = document.getElementById("user-email");
 const signOutButton = document.getElementById("sign-out");
 const demoLoginButton = document.getElementById("demo-login");
 const googleLoginButton = document.getElementById("google-login");
+const toggleModeButton = document.getElementById("toggle-mode");
+const modeCopy = document.getElementById("mode-copy");
+const primaryActionButton = document.getElementById("primary-action");
+const authFormTitle = document.getElementById("auth-form-title");
 
 const dashboard = document.getElementById("dashboard");
 const authGate = document.getElementById("auth-gate");
@@ -33,6 +40,38 @@ const claimDetails = document.getElementById("claim-details");
 const summaryGrid = document.getElementById("summary-grid");
 const statusFilter = document.getElementById("status-filter");
 const searchInput = document.getElementById("search-input");
+
+function setAuthMode(mode) {
+  authMode = mode;
+
+  if (!confirmPasswordInput || !primaryActionButton || !toggleModeButton || !modeCopy) {
+    return;
+  }
+
+  if (mode === "signup") {
+    confirmPasswordInput.classList.remove("hidden");
+    confirmPasswordInput.required = true;
+    confirmPasswordInput.value = "";
+    primaryActionButton.textContent = "Create Account";
+    modeCopy.textContent = "Already have an account?";
+    toggleModeButton.textContent = "Sign in";
+    toggleModeButton.setAttribute("aria-label", "Switch to sign-in");
+    if (authFormTitle) {
+      authFormTitle.textContent = "Create an account";
+    }
+  } else {
+    confirmPasswordInput.classList.add("hidden");
+    confirmPasswordInput.required = false;
+    confirmPasswordInput.value = "";
+    primaryActionButton.textContent = "Sign In";
+    modeCopy.textContent = "Need an account?";
+    toggleModeButton.textContent = "Create one";
+    toggleModeButton.setAttribute("aria-label", "Switch to sign-up");
+    if (authFormTitle) {
+      authFormTitle.textContent = "Sign in";
+    }
+  }
+}
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat("en-US", {
@@ -206,6 +245,7 @@ function enterDemoMode() {
 
 function exitDemoMode() {
   isDemoSession = false;
+  setAuthMode("signin");
   loginForm.classList.remove("hidden");
   userInfo.classList.add("hidden");
   authGate.classList.remove("hidden");
@@ -245,8 +285,27 @@ function attachEventListeners() {
     }
 
     try {
-      await signInWithEmailAndPassword(firebaseAuth, email, password);
+      if (authMode === "signup") {
+        if (!confirmPasswordInput) {
+          alert("Confirm password input missing from the page.");
+          return;
+        }
+
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (password !== confirmPassword) {
+          alert("Passwords do not match. Please re-enter them.");
+          return;
+        }
+
+        await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      } else {
+        await signInWithEmailAndPassword(firebaseAuth, email, password);
+      }
       loginForm.reset();
+      if (authMode === "signup") {
+        setAuthMode("signin");
+      }
     } catch (error) {
       alert(error.message);
     }
@@ -271,6 +330,13 @@ function attachEventListeners() {
   if (demoLoginButton) {
     demoLoginButton.addEventListener("click", () => {
       enterDemoMode();
+    });
+  }
+
+  if (toggleModeButton) {
+    toggleModeButton.addEventListener("click", () => {
+      const nextMode = authMode === "signin" ? "signup" : "signin";
+      setAuthMode(nextMode);
     });
   }
 
@@ -301,6 +367,7 @@ function handleAuthState(user) {
   }
 
   if (user) {
+    setAuthMode("signin");
     userEmail.textContent = user.email || user.uid;
     loginForm.classList.add("hidden");
     userInfo.classList.remove("hidden");
@@ -359,5 +426,6 @@ async function bootstrap() {
 }
 
 attachEventListeners();
+setAuthMode("signin");
 resetDashboard();
 bootstrap();

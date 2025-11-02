@@ -11,12 +11,24 @@
     <h1>Claims Processing Portal</h1>
     <div id="auth-status" class="auth-status">
       <form id="login-form" class="login-form" autocomplete="on">
+        <h2 id="auth-form-title">Sign in</h2>
         <input type="email" id="email" placeholder="Email" required />
         <input type="password" id="password" placeholder="Password" required />
+        <input
+          type="password"
+          id="confirm-password"
+          placeholder="Confirm Password"
+          class="hidden"
+          autocomplete="new-password"
+        />
         <div class="login-actions">
-          <button type="submit">Sign In</button>
+          <button type="submit" id="primary-action">Sign In</button>
           <button type="button" id="google-login" class="google">Sign in with Google</button>
           <button type="button" id="demo-login" class="secondary">Use Demo Mode</button>
+        </div>
+        <div class="form-switch">
+          <span id="mode-copy">Need an account?</span>
+          <button type="button" id="toggle-mode" class="link-button">Create one</button>
         </div>
       </form>
       <div id="user-info" class="user-info hidden">

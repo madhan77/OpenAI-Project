@@ -48,6 +48,7 @@ This repository contains a reference implementation of a health claims processin
    - **Common typo:** If your terminal reports `zsh: command not found: nmp`, double-check the command spelling—the Node package manager is `npm`, not `nmp`.
 3. **Sign in and explore**
    - Authenticate with a user provisioned in your Firebase project.
+   - Need to create a reviewer account? Click **Create one** beneath the form to switch to sign-up mode, enter the new credentials (with password confirmation), and the portal will provision the Firebase user for you.
    - Prefer a faster sign-in? Click **Sign in with Google** to launch the OAuth flow for any Google account registered with your Firebase project.
    - Alternatively, click **Use Demo Mode** to explore the portal with mock data and no authentication (ideal when credentials are unavailable during review).
    - Review the mock claim queue, detailed breakdowns, and summary metrics that mirror the backend workflow outputs.
