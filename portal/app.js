@@ -3,6 +3,8 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
@@ -13,6 +15,7 @@ let firebaseAuth = null;
 let selectedClaimId = null;
 let listenersAttached = false;
 let isDemoSession = false;
+let googleProvider = null;
 
 const loginForm = document.getElementById("login-form");
 const emailInput = document.getElementById("email");
@@ -21,6 +24,7 @@ const userInfo = document.getElementById("user-info");
 const userEmail = document.getElementById("user-email");
 const signOutButton = document.getElementById("sign-out");
 const demoLoginButton = document.getElementById("demo-login");
+const googleLoginButton = document.getElementById("google-login");
 
 const dashboard = document.getElementById("dashboard");
 const authGate = document.getElementById("auth-gate");
@@ -270,6 +274,24 @@ function attachEventListeners() {
     });
   }
 
+  if (googleLoginButton) {
+    googleLoginButton.addEventListener("click", async () => {
+      if (!firebaseAuth || !googleProvider) {
+        alert("Firebase has not been initialised yet. Check configuration.");
+        return;
+      }
+
+      try {
+        await signInWithPopup(firebaseAuth, googleProvider);
+      } catch (error) {
+        if (error?.code === "auth/popup-closed-by-user") {
+          return;
+        }
+        alert(error.message || "Unable to complete Google sign-in.");
+      }
+    });
+  }
+
   listenersAttached = true;
 }
 
@@ -312,6 +334,8 @@ function initialisePortal(firebaseConfig) {
   }
 
   firebaseAuth = getAuth(firebaseApp);
+  googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({ prompt: "select_account" });
   attachEventListeners();
   onAuthStateChanged(firebaseAuth, handleAuthState);
 }

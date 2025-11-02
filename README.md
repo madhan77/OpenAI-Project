@@ -34,7 +34,7 @@ This repository contains a reference implementation of a health claims processin
      ```
    - The Node-based dev server reads these `.env` files automatically and serves a `firebase-env.js` helper. For static hosting without a build step, you can still copy `portal/firebase-config.example.json` to `portal/firebase-config.json` and reuse the same values or create `portal/firebase-config.local.js` that sets `window.FIREBASE_CONFIG = { ... }`.
    - If you skip the environment files entirely, the portal falls back to the shared Firebase credentials embedded in `portal/firebase-env.js`, so reviewers can sign in immediately after starting the server.
-   - Ensure the email/password sign-in method is enabled for your Firebase Authentication instance.
+   - Ensure the email/password sign-in method is enabled for your Firebase Authentication instance. Enable Google as a federated provider if you want to use the new one-click Gmail option described below.
 2. **Serve the portal locally**
    - Open a terminal at the repository root (or a new window if you want to keep other processes running) and change into the portal directory:
      ```bash
@@ -48,6 +48,7 @@ This repository contains a reference implementation of a health claims processin
    - **Common typo:** If your terminal reports `zsh: command not found: nmp`, double-check the command spelling—the Node package manager is `npm`, not `nmp`.
 3. **Sign in and explore**
    - Authenticate with a user provisioned in your Firebase project.
+   - Prefer a faster sign-in? Click **Sign in with Google** to launch the OAuth flow for any Google account registered with your Firebase project.
    - Alternatively, click **Use Demo Mode** to explore the portal with mock data and no authentication (ideal when credentials are unavailable during review).
    - Review the mock claim queue, detailed breakdowns, and summary metrics that mirror the backend workflow outputs.
 
