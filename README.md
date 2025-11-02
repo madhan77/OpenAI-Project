@@ -37,6 +37,10 @@ This repository contains a reference implementation of a health claims processin
 3. **Sign in and explore**
    - Authenticate with a user provisioned in your Firebase project.
    - Review the mock claim queue, detailed breakdowns, and summary metrics that mirror the backend workflow outputs.
+4. **Developer Console**
+   - Click the "Console" button in the bottom right corner or press `Ctrl+\`` (or `Cmd+\`` on Mac) to open the developer terminal.
+   - Available commands: `help`, `status`, `version`, `clear`, `echo`
+   - The terminal provides a debugging interface for developers and administrators.
 
 ## Portal Login Link
 - **Local development:** [http://localhost:5173/](http://localhost:5173/) (after starting a static server in the `portal/` directory).
