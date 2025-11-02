@@ -45,6 +45,7 @@ This repository contains a reference implementation of a health claims processin
      npm start
      ```
    The lightweight dev server will read your `.env` file and host the portal at `http://localhost:5173`. (You can still use any static web server if you prefer; just ensure Firebase credentials are provided via JSON or a custom script.)
+   - **Common typo:** If your terminal reports `zsh: command not found: nmp`, double-check the command spelling—the Node package manager is `npm`, not `nmp`.
 3. **Sign in and explore**
    - Authenticate with a user provisioned in your Firebase project.
    - Alternatively, click **Use Demo Mode** to explore the portal with mock data and no authentication (ideal when credentials are unavailable during review).
