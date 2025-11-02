@@ -36,10 +36,14 @@ This repository contains a reference implementation of a health claims processin
    - If you skip the environment files entirely, the portal falls back to the shared Firebase credentials embedded in `portal/firebase-env.js`, so reviewers can sign in immediately after starting the server.
    - Ensure the email/password sign-in method is enabled for your Firebase Authentication instance.
 2. **Serve the portal locally**
-   ```bash
-   cd portal
-   npm start
-   ```
+   - Open a terminal at the repository root (or a new window if you want to keep other processes running) and change into the portal directory:
+     ```bash
+     cd portal
+     ```
+   - Run the dev server from inside that directory:
+     ```bash
+     npm start
+     ```
    The lightweight dev server will read your `.env` file and host the portal at `http://localhost:5173`. (You can still use any static web server if you prefer; just ensure Firebase credentials are provided via JSON or a custom script.)
 3. **Sign in and explore**
    - Authenticate with a user provisioned in your Firebase project.
