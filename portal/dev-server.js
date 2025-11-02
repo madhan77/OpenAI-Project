@@ -3,9 +3,10 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
+const { loadFirebaseEnv } = require("./env-utils");
+
 const PORT = process.env.PORT ? Number(process.env.PORT) : 5173;
 const ROOT_DIR = __dirname;
-const ENV_FILE_CANDIDATES = [".env.local", ".env"];
 const DEFAULT_FIREBASE_ENV = {
   VITE_FIREBASE_API_KEY: "AIzaSyB-bo4wgmeLm0Wg1eTiiFe69l6fuXRGCns",
   VITE_FIREBASE_AUTH_DOMAIN: "open-ai-project-723a7.firebaseapp.com",
@@ -23,47 +24,6 @@ const MIME_TYPES = {
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon"
 };
-
-function parseEnv(content) {
-  return content.split(/\r?\n/).reduce((acc, line) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) {
-      return acc;
-    }
-    const equalsIndex = trimmed.indexOf("=");
-    if (equalsIndex === -1) {
-      return acc;
-    }
-    const key = trimmed.slice(0, equalsIndex).trim();
-    let value = trimmed.slice(equalsIndex + 1).trim();
-    if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
-    }
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-
-function loadFirebaseEnv() {
-  for (const fileName of ENV_FILE_CANDIDATES) {
-    const fullPath = path.join(ROOT_DIR, fileName);
-    if (fs.existsSync(fullPath)) {
-      try {
-        const content = fs.readFileSync(fullPath, "utf8");
-        const parsed = parseEnv(content);
-        const firebaseKeys = Object.fromEntries(
-          Object.entries(parsed).filter(([key]) => key.startsWith("VITE_FIREBASE_"))
-        );
-        if (Object.keys(firebaseKeys).length > 0) {
-          return firebaseKeys;
-        }
-      } catch (error) {
-        console.warn(`Failed to read ${fileName}:`, error);
-      }
-    }
-  }
-  return null;
-}
 
 function toFirebaseConfigObject(envRecord) {
   if (!envRecord) {
@@ -87,7 +47,7 @@ function toFirebaseConfigObject(envRecord) {
 }
 
 function serveFirebaseEnv(res) {
-  const envRecord = loadFirebaseEnv() || DEFAULT_FIREBASE_ENV;
+  const envRecord = loadFirebaseEnv(ROOT_DIR) || DEFAULT_FIREBASE_ENV;
   const firebaseConfig = toFirebaseConfigObject(envRecord);
   let body;
   if (firebaseConfig) {

@@ -45,6 +45,7 @@ This repository contains a reference implementation of a health claims processin
      npm start
      ```
    The lightweight dev server will read your `.env` file and host the portal at `http://localhost:5173`. (You can still use any static web server if you prefer; just ensure Firebase credentials are provided via JSON or a custom script.)
+   - Want the login link echoed back in your terminal? Run `npm run login-url` from the same directory at any time to print both the local and Firebase-hosted URLs detected from your environment settings.
    - **Common typo:** If your terminal reports `zsh: command not found: nmp`, double-check the command spelling—the Node package manager is `npm`, not `nmp`.
 3. **Sign in and explore**
    - Authenticate with a user provisioned in your Firebase project.
@@ -53,9 +54,10 @@ This repository contains a reference implementation of a health claims processin
    - Alternatively, click **Use Demo Mode** to explore the portal with mock data and no authentication (ideal when credentials are unavailable during review).
    - Review the mock claim queue, detailed breakdowns, and summary metrics that mirror the backend workflow outputs.
 
-## Portal Login Link
-- **Local development:** [http://localhost:5173/](http://localhost:5173/) (after starting a static server in the `portal/` directory).
+## Portal Login URLs
+- **Local development:** [http://localhost:5173/](http://localhost:5173/) (after starting `npm start` inside the `portal/` directory).
 - **Firebase Hosting:** `https://<your-project-id>.web.app/` or `https://<your-project-id>.firebaseapp.com/` once you deploy the `/portal` folder to your Firebase project. Replace `<your-project-id>` with the identifier from your Firebase console.
+- **Command-line reminder:** `cd portal && npm run login-url` prints both links using the Firebase project ID discovered from your environment.
 
 ## Documentation
 - [PRD](docs/claims-processing-prd.md)
