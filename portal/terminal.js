@@ -37,6 +37,8 @@ export class Terminal {
       status: {
         description: 'Show system status',
         execute: () => {
+          // Note: These are hardcoded values for the initial implementation.
+          // Future enhancement: dynamically check Firebase auth and portal mode
           return `System Status: Online
 Firebase Auth: Connected
 Portal Mode: Development`;
