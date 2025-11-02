@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "open-ai-project-723a7",
     "public": "portal",
     "ignore": [
       "firebase.json",

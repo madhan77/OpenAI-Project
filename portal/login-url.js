@@ -38,7 +38,7 @@ function main() {
   }
 
   console.log('\nIf the hosted URL shows "Site Not Found", deploy the portal with:');
-  console.log('  firebase deploy --only hosting');
+  console.log('  cd portal && npm run deploy');
 }
 
 main();

@@ -5,6 +5,7 @@
   "description": "Static reviewer portal for the health claims processing app",
   "scripts": {
     "start": "node dev-server.js",
-    "login-url": "node login-url.js"
+    "login-url": "node login-url.js",
+    "deploy": "node deploy-hosting.js"
   }
 }

@@ -75,11 +75,12 @@ If you open the hosted URL before deploying, Firebase will display a **Site Not 
    - `firebase.json` points hosting to the `portal/` directory and rewrites requests to `index.html` for the single-page app.
 4. **Deploy the reviewer portal:**
    ```bash
-   firebase deploy --only hosting
+   cd portal
+   npm run deploy
    ```
-   Once the deploy succeeds, the `https://<project-id>.web.app/` link will load the login page instead of the Site Not Found message.
+   If you have not installed the Firebase CLI yet, run `npm install -g firebase-tools` first (or install it locally inside the `portal/` folder). The helper script wraps the Firebase CLI, automatically targeting the project ID from `.firebaserc`, your environment variables, or the shared `open-ai-project-723a7` fallback. When the command finishes you should be able to load `https://<project-id>.web.app/` without seeing the Site Not Found message.
 
-Need to verify the links after deploying? Run `npm --prefix portal run login-url` to print the local and hosted URLs again.
+Need to verify the links after deploying? Run `npm --prefix portal run login-url` to print the local and hosted URLs again. The deploy script also echoes the expected hosted URL on success so you can click it immediately.
 
 ## Documentation
 - [PRD](docs/claims-processing-prd.md)
