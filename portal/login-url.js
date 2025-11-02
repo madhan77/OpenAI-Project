@@ -36,6 +36,9 @@ function main() {
   if (!envRecord) {
     console.log('\nNote: Using the shared demo Firebase project. Provide portal/.env.local to override.');
   }
+
+  console.log('\nIf the hosted URL shows "Site Not Found", deploy the portal with:');
+  console.log('  firebase deploy --only hosting');
 }
 
 main();

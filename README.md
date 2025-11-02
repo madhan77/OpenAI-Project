@@ -59,6 +59,28 @@ This repository contains a reference implementation of a health claims processin
 - **Firebase Hosting:** `https://<your-project-id>.web.app/` or `https://<your-project-id>.firebaseapp.com/` once you deploy the `/portal` folder to your Firebase project. Replace `<your-project-id>` with the identifier from your Firebase console.
 - **Command-line reminder:** `cd portal && npm run login-url` prints both links using the Firebase project ID discovered from your environment.
 
+## Deploying the Portal to Firebase Hosting
+If you open the hosted URL before deploying, Firebase will display a **Site Not Found** banner. Deploying the portal bundle resolves this:
+
+1. **Install the Firebase CLI** (if you do not already have it):
+   ```bash
+   npm install -g firebase-tools
+   ```
+2. **Authenticate with Firebase** (only required the first time):
+   ```bash
+   firebase login
+   ```
+3. **Review the project configuration:**
+   - The provided `.firebaserc` file defaults to the shared `open-ai-project-723a7` project ID. Update it if you plan to deploy elsewhere.
+   - `firebase.json` points hosting to the `portal/` directory and rewrites requests to `index.html` for the single-page app.
+4. **Deploy the reviewer portal:**
+   ```bash
+   firebase deploy --only hosting
+   ```
+   Once the deploy succeeds, the `https://<project-id>.web.app/` link will load the login page instead of the Site Not Found message.
+
+Need to verify the links after deploying? Run `npm --prefix portal run login-url` to print the local and hosted URLs again.
+
 ## Documentation
 - [PRD](docs/claims-processing-prd.md)
 - [Application Architecture](docs/claims-processing-app.md)
