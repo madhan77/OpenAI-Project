@@ -6,6 +6,12 @@ const path = require("path");
 const PORT = process.env.PORT ? Number(process.env.PORT) : 5173;
 const ROOT_DIR = __dirname;
 const ENV_FILE_CANDIDATES = [".env.local", ".env"];
+const DEFAULT_FIREBASE_ENV = {
+  VITE_FIREBASE_API_KEY: "AIzaSyB-bo4wgmeLm0Wg1eTiiFe69l6fuXRGCns",
+  VITE_FIREBASE_AUTH_DOMAIN: "open-ai-project-723a7.firebaseapp.com",
+  VITE_FIREBASE_PROJECT_ID: "open-ai-project-723a7",
+  VITE_FIREBASE_APP_ID: "project-299553862015"
+};
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
@@ -81,7 +87,7 @@ function toFirebaseConfigObject(envRecord) {
 }
 
 function serveFirebaseEnv(res) {
-  const envRecord = loadFirebaseEnv();
+  const envRecord = loadFirebaseEnv() || DEFAULT_FIREBASE_ENV;
   const firebaseConfig = toFirebaseConfigObject(envRecord);
   let body;
   if (firebaseConfig) {
