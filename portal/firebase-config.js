@@ -1,5 +1,19 @@
 const CONFIG_JSON_PATH = "firebase-config.json";
 
+const SHARED_REVIEW_ENV = {
+  VITE_FIREBASE_API_KEY: "AIzaSyB-bo4wgmeLm0Wg1eTiiFe69l6fuXRGCns",
+  VITE_FIREBASE_AUTH_DOMAIN: "open-ai-project-723a7.firebaseapp.com",
+  VITE_FIREBASE_PROJECT_ID: "open-ai-project-723a7",
+  VITE_FIREBASE_APP_ID: "project-299553862015"
+};
+
+const SHARED_REVIEW_CONFIG = {
+  apiKey: SHARED_REVIEW_ENV.VITE_FIREBASE_API_KEY,
+  authDomain: SHARED_REVIEW_ENV.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: SHARED_REVIEW_ENV.VITE_FIREBASE_PROJECT_ID,
+  appId: SHARED_REVIEW_ENV.VITE_FIREBASE_APP_ID
+};
+
 const ENV_KEY_MAP = {
   VITE_FIREBASE_API_KEY: "apiKey",
   VITE_FIREBASE_AUTH_DOMAIN: "authDomain",
@@ -74,6 +88,20 @@ async function fetchConfigFromJson() {
   }
 }
 
+function persistConfig(config, envRecord) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (envRecord && Object.keys(envRecord).length > 0) {
+    window.FIREBASE_ENV = envRecord;
+  }
+
+  if (config && Object.keys(config).length > 0) {
+    window.FIREBASE_CONFIG = config;
+  }
+}
+
 export async function loadFirebaseConfig() {
   const envConfig =
     readViteEnvironment() ||
@@ -81,9 +109,11 @@ export async function loadFirebaseConfig() {
     (typeof window !== "undefined" && window.FIREBASE_CONFIG);
 
   if (envConfig) {
-    if (typeof window !== "undefined") {
-      window.FIREBASE_CONFIG = envConfig;
-    }
+    const existingEnv =
+      typeof window !== "undefined" && window.FIREBASE_ENV
+        ? window.FIREBASE_ENV
+        : null;
+    persistConfig(envConfig, existingEnv);
     return envConfig;
   }
 
@@ -93,19 +123,22 @@ export async function loadFirebaseConfig() {
 
   const jsonConfig = await fetchConfigFromJson();
   if (jsonConfig) {
-    if (typeof window !== "undefined") {
-      window.FIREBASE_CONFIG = jsonConfig;
-    }
+    const existingEnv =
+      typeof window !== "undefined" && window.FIREBASE_ENV
+        ? window.FIREBASE_ENV
+        : null;
+    persistConfig(jsonConfig, existingEnv);
     return jsonConfig;
   }
 
   if (typeof window !== "undefined" && window.FIREBASE_CONFIG === undefined) {
-    console.warn(
-      "Firebase configuration was not found. Provide portal/firebase-config.json, portal/firebase-config.local.js, or environment variables."
+    console.info(
+      "Falling back to the shared review Firebase configuration. Provide portal/.env.local or portal/firebase-config.json to override."
     );
+    persistConfig(SHARED_REVIEW_CONFIG, SHARED_REVIEW_ENV);
   }
 
-  return null;
+  return SHARED_REVIEW_CONFIG;
 }
 
 if (typeof window !== "undefined") {
