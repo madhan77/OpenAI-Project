@@ -14,15 +14,25 @@ The prototype dashboard renders mock operational data so that the UI can be deve
 
 ### Setup
 
-1. Follow the [Firebase setup guide](docs/firebase-setup.md) to create/configure your project and obtain the web credentials.
+1. Follow the [Firebase setup guide](docs/firebase-setup.md) if you need to provision a new Firebase project. This repository is
+   preconfigured with credentials for `open-ai-project-723a7`.
 
-2. Copy the example environment file and populate it with the values from your Firebase console:
+2. Copy the example environment file (already populated with the provided Firebase credentials) to `.env.local`:
 
    ```bash
    cp frontend/.env.example frontend/.env.local
    ```
 
-   Update `.env.local` with the keys for your Firebase web app (API key, auth domain, project ID, and app ID).
+   The copied file contains:
+
+   ```env
+   VITE_FIREBASE_API_KEY="AIzaSyB-bo4wgmeLm0Wg1eTiiFe69l6fuXRGCns"
+   VITE_FIREBASE_AUTH_DOMAIN="open-ai-project-723a7.firebaseapp.com"
+   VITE_FIREBASE_PROJECT_ID="open-ai-project-723a7"
+   VITE_FIREBASE_APP_ID="project-299553862015"
+   ```
+
+   Adjust these values only if you intend to connect a different Firebase project.
 
 3. Install dependencies and start the development server:
 

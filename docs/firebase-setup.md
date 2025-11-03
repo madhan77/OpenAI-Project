@@ -30,13 +30,13 @@ identity provider instance.
    cp frontend/.env.example frontend/.env.local
    ```
 
-2. Paste the values from the Firebase console into `.env.local`, replacing each placeholder:
+2. Paste the provided credentials (or replace them with your own) into `.env.local`:
 
    ```env
-   VITE_FIREBASE_API_KEY=your-api-key
-   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your-project-id
-   VITE_FIREBASE_APP_ID=your-app-id
+   VITE_FIREBASE_API_KEY="AIzaSyB-bo4wgmeLm0Wg1eTiiFe69l6fuXRGCns"
+   VITE_FIREBASE_AUTH_DOMAIN="open-ai-project-723a7.firebaseapp.com"
+   VITE_FIREBASE_PROJECT_ID="open-ai-project-723a7"
+   VITE_FIREBASE_APP_ID="project-299553862015"
    ```
 
 3. (Optional) If you captured additional fields such as `storageBucket` or `measurementId`, you can add them to the `.env.local`
