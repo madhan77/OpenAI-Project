@@ -21,7 +21,16 @@ This repository delivers a production-aligned call center platform implementing 
    pip install -e .[dev]
    ```
 
-2. Provide Firebase configuration for authentication by setting the variables defined in `call_center/config.py` (for example, `CALL_CENTER_FIREBASE_PROJECT_ID` and `CALL_CENTER_FIREBASE_EMULATOR_JWT_SECRET`). When targeting a live Firebase project, supply `CALL_CENTER_FIREBASE_SERVICE_ACCOUNT_CERT` with a PEM-encoded certificate so ID tokens can be verified. The mock integrations ship with canned data and require no additional credentials.
+2. Provide Firebase configuration for authentication by updating the `.env` file. The repository is pre-populated with the project's Firebase credentials:
+
+   ```ini
+   VITE_FIREBASE_API_KEY="AIzaSyB-bo4wgmeLm0Wg1eTiiFe69l6fuXRGCns"
+   VITE_FIREBASE_AUTH_DOMAIN="open-ai-project-723a7.firebaseapp.com"
+   VITE_FIREBASE_PROJECT_ID="open-ai-project-723a7"
+   VITE_FIREBASE_APP_ID="project-299553862015"
+   ```
+
+   These values are also mirrored to the `CALL_CENTER_FIREBASE_*` variables consumed by the FastAPI backend. Adjust them if you rotate Firebase credentials or target a different project. When running against Firebase outside the emulator, set `CALL_CENTER_FIREBASE_SERVICE_ACCOUNT_CERT` with a PEM-encoded certificate so ID tokens can be verified. The mock integrations ship with canned data and require no additional credentials.
 
 3. Launch the API and UI server:
 

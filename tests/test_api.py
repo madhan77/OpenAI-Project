@@ -107,5 +107,5 @@ def test_login_page_serves_firebase_config() -> None:
     assert response.status_code == 200
     body = response.text
     assert "Call Center Login" in body
-    assert "firebaseapp.com" in body
+    assert "open-ai-project-723a7.firebaseapp.com" in body
     assert "token" in body

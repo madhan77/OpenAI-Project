@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import AnyHttpUrl, Field
+from pydantic import AliasChoices, AnyHttpUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,12 +26,36 @@ class AppConfig(BaseSettings):
         description="Expose Prometheus metrics endpoint when True.",
     )
     firebase_project_id: str = Field(
-        default="call-center-demo",
+        default="open-ai-project-723a7",
         description="Firebase project identifier used for authentication",
+        validation_alias=AliasChoices(
+            "CALL_CENTER_FIREBASE_PROJECT_ID",
+            "VITE_FIREBASE_PROJECT_ID",
+        ),
+    )
+    firebase_auth_domain: str = Field(
+        default="open-ai-project-723a7.firebaseapp.com",
+        description="Firebase authentication domain used by hosted login flows",
+        validation_alias=AliasChoices(
+            "CALL_CENTER_FIREBASE_AUTH_DOMAIN",
+            "VITE_FIREBASE_AUTH_DOMAIN",
+        ),
+    )
+    firebase_app_id: str = Field(
+        default="project-299553862015",
+        description="Firebase application identifier",
+        validation_alias=AliasChoices(
+            "CALL_CENTER_FIREBASE_APP_ID",
+            "VITE_FIREBASE_APP_ID",
+        ),
     )
     firebase_web_api_key: str = Field(
-        default="demo-api-key",
+        default="AIzaSyB-bo4wgmeLm0Wg1eTiiFe69l6fuXRGCns",
         description="Firebase Web API key used by the front-end",
+        validation_alias=AliasChoices(
+            "CALL_CENTER_FIREBASE_WEB_API_KEY",
+            "VITE_FIREBASE_API_KEY",
+        ),
     )
     firebase_emulator_mode: bool = Field(
         default=True,

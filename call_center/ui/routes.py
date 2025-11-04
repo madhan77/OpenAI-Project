@@ -26,6 +26,8 @@ def register_ui(app: FastAPI) -> None:
             "firebase_project_id": config.firebase_project_id,
             "firebase_api_key": config.firebase_web_api_key,
             "firebase_emulator_mode": config.firebase_emulator_mode,
+            "firebase_auth_domain": config.firebase_auth_domain,
+            "firebase_app_id": config.firebase_app_id,
         }
         return templates.TemplateResponse("login.html", context)
 

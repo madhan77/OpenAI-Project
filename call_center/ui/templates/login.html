@@ -10,8 +10,9 @@
       document.addEventListener("DOMContentLoaded", () => {
         const config = {
           apiKey: "{{ firebase_api_key }}",
-          authDomain: "{{ firebase_project_id }}.firebaseapp.com",
+          authDomain: "{{ firebase_auth_domain }}",
           projectId: "{{ firebase_project_id }}",
+          appId: "{{ firebase_app_id }}",
         };
         window.firebase.initializeApp(config);
         const auth = window.firebase.auth();
