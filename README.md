@@ -78,10 +78,14 @@ token before running any workflows.
 > VITE_FIREBASE_AUTH_DOMAIN="open-ai-project-723a7.firebaseapp.com"
 > VITE_FIREBASE_PROJECT_ID="open-ai-project-723a7"
 > VITE_FIREBASE_APP_ID="project-299553862015"
+> FIREBASE_WEB_API_KEY="${VITE_FIREBASE_API_KEY}"
+> FIREBASE_PROJECT_ID="${VITE_FIREBASE_PROJECT_ID}"
 > ```
 >
 > These values are safe to check into source control and allow the bundled CLI (or any
-> future Vite-based UI) to authenticate against the same Firebase tenant.
+> future Vite-based UI) to authenticate against the same Firebase tenant. The
+> `FIREBASE_WEB_API_KEY` and `FIREBASE_PROJECT_ID` aliases let the CLI pick up the
+> shared configuration without additional exports.
 
 Environment variables offer an alternative to passing command-line flags:
 
