@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import os
+import time
 from dataclasses import dataclass, field
 from importlib import import_module
 from types import ModuleType
 from typing import Any, Callable, Dict, Optional
+from urllib import error, request
 
 
 class FirebaseAuthError(RuntimeError):
@@ -53,11 +56,15 @@ class FirebaseAuthService:
         project_id: Optional[str] = None,
         use_emulator: bool = False,
         module_loader: Callable[[str], ModuleType] | None = None,
+        request_func: Callable[[str, Dict[str, Any]], Dict[str, Any]] | None = None,
+        time_func: Callable[[], float] | None = None,
     ) -> None:
         self._credentials_path = credentials_path or os.getenv("FIREBASE_CREDENTIALS")
         self._project_id = project_id or os.getenv("FIREBASE_PROJECT_ID")
         self._use_emulator = use_emulator or bool(os.getenv("FIREBASE_AUTH_EMULATOR_HOST"))
         self._module_loader = module_loader or import_module
+        self._request_func = request_func or self._default_request
+        self._time_func = time_func or time.time
 
         self._firebase_admin: Optional[ModuleType] = None
         self._credentials_module: Optional[ModuleType] = None
@@ -88,6 +95,60 @@ class FirebaseAuthService:
                 for key, value in decoded_token.items()
                 if key not in self._RESERVED_CLAIMS
             },
+        )
+
+    def sign_in_with_password(
+        self,
+        *,
+        email: str,
+        password: str,
+        api_key: Optional[str] = None,
+    ) -> "FirebaseSession":
+        """Authenticate with Firebase using an email/password credential.
+
+        This method relies on the Firebase Identity Toolkit REST API, making it
+        usable without the Admin SDK installed. The resulting ID token can be
+        reused with :meth:`authenticate` for server-side verification when the
+        Admin SDK is available.
+        """
+
+        if not email or not password:
+            raise FirebaseAuthError("Both email and password are required to sign in with Firebase.")
+
+        web_api_key = (
+            api_key
+            or os.getenv("FIREBASE_WEB_API_KEY")
+            or os.getenv("VITE_FIREBASE_API_KEY")
+        )
+        if not web_api_key:
+            raise FirebaseAuthError(
+                "A Firebase web API key is required. Pass api_key explicitly or set "
+                "FIREBASE_WEB_API_KEY/VITE_FIREBASE_API_KEY."
+            )
+
+        url = (
+            "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
+            f"{web_api_key}"
+        )
+        payload = {
+            "email": email,
+            "password": password,
+            "returnSecureToken": True,
+        }
+
+        response = self._request_func(url, payload)
+
+        try:
+            expires_in = int(response.get("expiresIn", "0"))
+        except (TypeError, ValueError):  # pragma: no cover - defensive
+            expires_in = 0
+
+        return FirebaseSession(
+            id_token=response.get("idToken", ""),
+            refresh_token=response.get("refreshToken"),
+            user_id=response.get("localId", ""),
+            email=response.get("email"),
+            expires_at=self._time_func() + expires_in if expires_in else self._time_func(),
         )
 
     # Internal helpers ---------------------------------------------------
@@ -136,4 +197,72 @@ class FirebaseAuthService:
                 "Firebase Admin SDK is required but not installed. Install the "
                 "'firebase-admin' package to enable authentication."
             ) from exc
+
+    def _default_request(self, url: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        data = json.dumps(payload).encode("utf-8")
+        http_request = request.Request(
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with request.urlopen(http_request, timeout=10) as response:
+                body = response.read().decode("utf-8")
+        except error.HTTPError as exc:  # pragma: no cover - depends on network
+            message = self._extract_error_message(exc)
+            raise FirebaseAuthError(f"Firebase login failed: {message}") from exc
+        except error.URLError as exc:  # pragma: no cover - depends on network
+            raise FirebaseAuthError(f"Failed to contact Firebase: {exc.reason}") from exc
+
+        try:
+            return json.loads(body)
+        except json.JSONDecodeError as exc:  # pragma: no cover - depends on network
+            raise FirebaseAuthError("Unexpected response from Firebase Authentication.") from exc
+
+    def _extract_error_message(self, http_error: error.HTTPError) -> str:
+        try:
+            details = json.loads(http_error.read().decode("utf-8"))
+        except Exception:  # pragma: no cover - defensive
+            return http_error.reason
+
+        if isinstance(details, dict):
+            error_info = details.get("error")
+            if isinstance(error_info, dict):
+                return error_info.get("message", http_error.reason)
+        return http_error.reason
+
+
+@dataclass
+class FirebaseSession:
+    """Represents a Firebase authenticated session token."""
+
+    id_token: str
+    refresh_token: Optional[str]
+    user_id: str
+    email: Optional[str]
+    expires_at: float
+
+    def is_expired(self, *, margin_seconds: int = 30, now: Optional[float] = None) -> bool:
+        current_time = now if now is not None else time.time()
+        return current_time >= (self.expires_at - margin_seconds)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id_token": self.id_token,
+            "refresh_token": self.refresh_token,
+            "user_id": self.user_id,
+            "email": self.email,
+            "expires_at": self.expires_at,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "FirebaseSession":
+        return cls(
+            id_token=data.get("id_token", ""),
+            refresh_token=data.get("refresh_token"),
+            user_id=data.get("user_id", ""),
+            email=data.get("email"),
+            expires_at=float(data.get("expires_at", 0)),
+        )
 

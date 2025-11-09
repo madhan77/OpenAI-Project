@@ -95,6 +95,27 @@ When experimenting with the Firebase emulator, supply `--use-firebase-emulator` 
 `FIREBASE_AUTH_EMULATOR_HOST`) and omit the service account file. The CLI will announce
 the authenticated user for easier debugging.
 
+### Email/Password Login Flow
+
+If you prefer to authenticate with a Firebase email/password account instead of
+manually copying ID tokens, use the built-in `login` command. It exchanges your
+credentials for an ID token using the Firebase Identity Toolkit REST API and can
+optionally persist the session locally for future runs.
+
+```bash
+# Sign in (prompts for password if omitted)
+python scripts/enterprise_sales_agent_cli.py \
+  --firebase-api-key "$VITE_FIREBASE_API_KEY" \
+  login --email your.user@example.com --remember --verify
+
+# Reuse the saved session token when invoking workflows
+python scripts/enterprise_sales_agent_cli.py --use-session briefing "Acme Industries"
+```
+
+Session data is stored in `~/.enterprise_sales_agent/session.json` by default. To use
+a different path, pass `--session-file` on either the `login` command or subsequent
+workflow invocations.
+
 ## Project Structure
 
 ```
