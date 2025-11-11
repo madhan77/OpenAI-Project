@@ -28,7 +28,12 @@ POAssistAgent
 ## Usage Walkthrough
 
 ```python
-from poa_app import POAssistAgent, ProductIdea, SprintCapacity
+from poa_app import (
+    POAssistAgent,
+    ProductIdea,
+    SprintCapacity,
+    build_preview,
+)
 
 agent = POAssistAgent()
 
@@ -51,6 +56,26 @@ plan = agent.plan_next_sprint(capacity)
 
 for entry in plan.committed_items:
     print(entry.rank, entry.item.identifier, entry.item.title)
+```
+
+### Previewing the Workflow
+
+To generate a shareable snapshot of the current backlog, recent meetings, and sprint plan, call the preview helper:
+
+```python
+from poa_app import build_preview, POAssistAgent
+
+agent = POAssistAgent()
+# populate the agent using capture_idea / register_meeting...
+
+preview = build_preview(agent)
+print(preview.as_markdown())
+```
+
+For a ready-to-run demo seeded with sample data use:
+
+```bash
+python -m poa_app.preview
 ```
 
 ## Next Steps

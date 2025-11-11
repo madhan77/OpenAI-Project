@@ -11,6 +11,7 @@ from poa_app import (
     POAssistAgent,
     ProductIdea,
     SprintCapacity,
+    build_preview,
 )
 from poa_app.evaluation import evaluate_product_idea
 
@@ -150,3 +151,39 @@ def test_capture_idea_and_plan_sprint_flow() -> None:
     assert plan.total_points <= plan.capacity
     assert any(entry.item.identifier == item.identifier for entry in plan.committed_items)
     assert plan.capacity == pytest.approx(13, abs=1)
+
+
+def test_preview_snapshot_provides_markdown_summary() -> None:
+    backlog = BacklogRepository()
+    meetings = MeetingLog()
+    agent = POAssistAgent(backlog_repository=backlog, meeting_log=meetings)
+
+    idea = ProductIdea(
+        title="Team health dashboard",
+        persona="product owner",
+        goal="spot blockers quickly",
+        benefit="the team can address risks before sprint review",
+        description="Aggregates cycle time, WIP, and blockers into a single view.",
+        tags=("insight", "operations"),
+    )
+
+    item = agent.capture_idea("POA-301", idea)
+    agent.update_item_status(item.identifier, "ready")
+
+    agent.register_meeting(
+        "retro-sync",
+        MeetingTranscript(
+            attendees=("PO", "Scrum Master"),
+            goals=("Surface sprint health actions",),
+            discussion_points=("Team agreed to focus on WIP limits",),
+            decisions=("Pilot dashboard widget next sprint",),
+        ),
+    )
+
+    preview = build_preview(agent, capacity=SprintCapacity(available_points=12))
+    summary = preview.as_markdown()
+
+    assert "PO Assist Preview" in summary
+    assert "POA-301" in summary
+    assert "retro-sync" in summary
+    assert "Capacity" in summary

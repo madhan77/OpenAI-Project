@@ -29,6 +29,7 @@ from poa_app import (
     AcceptanceCriterion,
     BacklogItem,
     BacklogItemMetrics,
+    PreviewSnapshot,
     MeetingAnalysis,
     MeetingRecord,
     MeetingTranscript,
@@ -39,6 +40,8 @@ from poa_app import (
     MeetingLog,
     SprintCapacity,
     SprintPlan,
+    build_preview,
+    demo_preview,
     UserStory,
 )
 
@@ -79,4 +82,7 @@ __all__ = [
     "MeetingLog",
     "SprintCapacity",
     "SprintPlan",
+    "PreviewSnapshot",
+    "build_preview",
+    "demo_preview",
 ]
