@@ -1,4 +1,4 @@
-"""Convenience exports for the claims processing application."""
+"""Convenience exports for product workflows."""
 
 from claims_app import (
     Claim,
@@ -25,6 +25,20 @@ from claims_app import (
     SMSChannel,
 )
 
+from poa_app import (
+    AcceptanceCriterion,
+    BacklogItem,
+    BacklogItemMetrics,
+    MeetingAnalysis,
+    MeetingTranscript,
+    POAssistAgent,
+    PrioritizedBacklogItem,
+    ProductIdea,
+    SprintCapacity,
+    SprintPlan,
+    UserStory,
+)
+
 __all__ = [
     "Claim",
     "ClaimDecision",
@@ -48,4 +62,15 @@ __all__ = [
     "ProviderProfile",
     "PortalChannel",
     "SMSChannel",
+    "POAssistAgent",
+    "ProductIdea",
+    "UserStory",
+    "AcceptanceCriterion",
+    "BacklogItem",
+    "BacklogItemMetrics",
+    "PrioritizedBacklogItem",
+    "MeetingTranscript",
+    "MeetingAnalysis",
+    "SprintCapacity",
+    "SprintPlan",
 ]
