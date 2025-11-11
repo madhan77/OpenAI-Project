@@ -22,6 +22,11 @@ class ProductIdea:
     benefit: str
     description: str = ""
     constraints: Sequence[str] = field(default_factory=tuple)
+    tags: Sequence[str] = field(default_factory=tuple)
+    impact: int | None = None
+    urgency: int | None = None
+    risk_mitigation: int | None = None
+    estimated_effort: int | None = None
 
 
 @dataclass(frozen=True)
@@ -60,6 +65,8 @@ class BacklogItem:
     title: str
     metrics: BacklogItemMetrics
     estimate_points: int
+    story: "UserStory | None" = None
+    status: str = "proposed"
 
 
 @dataclass(frozen=True)
@@ -91,6 +98,15 @@ class MeetingAnalysis:
     action_items: Sequence[str]
     clarity_gaps: Sequence[str]
     risks: Sequence[str]
+
+
+@dataclass(frozen=True)
+class MeetingRecord:
+    """Stored meeting artefact combining transcript and analysis."""
+
+    identifier: str
+    transcript: MeetingTranscript
+    analysis: MeetingAnalysis
 
 
 @dataclass(frozen=True)
@@ -126,6 +142,7 @@ __all__ = [
     "PrioritizedBacklogItem",
     "MeetingTranscript",
     "MeetingAnalysis",
+    "MeetingRecord",
     "SprintCapacity",
     "SprintPlan",
 ]

@@ -12,6 +12,13 @@ def prioritize_backlog(items: Iterable[BacklogItem]) -> List[PrioritizedBacklogI
     scored: List[PrioritizedBacklogItem] = []
     for item in items:
         score = item.metrics.weighted_shortest_job_first()
+
+        if item.metrics.dependencies:
+            score -= 0.1 * len(item.metrics.dependencies)
+
+        if item.status not in {"proposed", "ready"}:
+            score -= 1
+
         scored.append(PrioritizedBacklogItem(item=item, score=score, rank=0))
 
     scored.sort(key=lambda entry: entry.score, reverse=True)

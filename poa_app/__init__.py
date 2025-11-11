@@ -6,6 +6,7 @@ from .models import (
     BacklogItem,
     BacklogItemMetrics,
     MeetingAnalysis,
+    MeetingRecord,
     MeetingTranscript,
     PrioritizedBacklogItem,
     ProductIdea,
@@ -13,6 +14,7 @@ from .models import (
     SprintPlan,
     UserStory,
 )
+from .repository import BacklogRepository, MeetingLog
 
 __all__ = [
     "POAssistAgent",
@@ -20,10 +22,13 @@ __all__ = [
     "BacklogItem",
     "BacklogItemMetrics",
     "MeetingAnalysis",
+    "MeetingRecord",
     "MeetingTranscript",
     "PrioritizedBacklogItem",
     "ProductIdea",
     "SprintCapacity",
     "SprintPlan",
     "UserStory",
+    "BacklogRepository",
+    "MeetingLog",
 ]
