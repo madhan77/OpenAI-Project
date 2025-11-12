@@ -8,6 +8,7 @@ This repository contains a reference implementation of a health claims processin
 - Manual review work queue, payment instruction and EOB generation, and multi-channel notifications.
 - In-memory repositories and metrics collectors for deterministic tests with clear extension points.
 - Web portal prototype secured by Firebase Authentication for claim reviewers.
+- Project management toolkit to plan delivery work with tasks, dependencies, and progress analytics.
 
 ## Getting Started (Workflow Engine)
 1. **Install dependencies**
@@ -45,6 +46,7 @@ This repository contains a reference implementation of a health claims processin
 ## Documentation
 - [PRD](docs/claims-processing-prd.md)
 - [Application Architecture](docs/claims-processing-app.md)
+- `project_management/` module docs via inline docstrings and `tests/test_project_management_tool.py` usage examples.
 
 ## Project Structure
 ```
