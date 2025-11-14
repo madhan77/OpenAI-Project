@@ -1,19 +1,26 @@
 # PO Assist Agent Prototype
 
-This document captures the initial prototype for the Product Owner Assist Agent (POA) based on the approved PRD. The goal of the prototype is to demonstrate end-to-end automation for the highest priority workflows: idea capture, backlog readiness, meeting documentation, and sprint planning recommendations.
+This document captures the evolving prototype for the Product Owner Assist Agent (POA) based on the approved PRD. The goal of the
+prototype is to demonstrate end-to-end automation for the highest priority workflows: idea capture, backlog readiness, meeting
+documentation, sprint planning recommendations, and roadmap visualisation with lightweight integrations.
 
 ## Architecture
 
-The prototype is implemented as a Python package `poa_app` that exposes a facade `POAssistAgent`. The agent stitches together specialised modules so that downstream surfaces (CLI, chat UI, integrations) only need to interact with a single object.
+The prototype is implemented as a Python package `poa_app` that exposes a facade `POAssistAgent`. The agent stitches together specialised
+modules so that downstream surfaces (CLI, chat UI, integrations) only need to interact with a single object.
 
 ```
 POAssistAgent
+├── ingestion.py         # Natural-language parsing for ideas and meeting notes
 ├── evaluation.py        # Heuristics that turn product ideas into backlog items
 ├── generators.py        # Structured user story templates with acceptance criteria
 ├── meetings.py          # Meeting summarisation and action item extraction
 ├── prioritizer.py       # WSJF-style ranking with dependency & status awareness
+├── sprint_planning.py   # Capacity-aware sprint planning suggestions
+├── roadmap.py           # Quarterly roadmap distribution utilities
+├── integrations.py      # Simulated connectors for Jira, Slack, and documentation
 ├── repository.py        # In-memory backlog + meeting storage for rapid iteration
-└── sprint_planning.py   # Capacity-aware sprint planning suggestions
+└── preview.py           # Markdown preview snapshots for stakeholders
 ```
 
 ## Capabilities
@@ -21,9 +28,13 @@ POAssistAgent
 | Capability | Description | Prototype Output |
 |------------|-------------|------------------|
 | Idea Capture | `POAssistAgent.capture_idea()` evaluates a `ProductIdea`, generates a user story, and stores a backlog item with WSJF metrics. | `BacklogItem` with attached `UserStory`, ready for refinement. |
+| Natural Language Ingestion | `POAssistAgent.ingest_raw_idea()` and `log_meeting_notes()` convert free-form notes into structured artefacts. | Parsed `ProductIdea` metadata and `MeetingTranscript` with provenance notes. |
 | Backlog Prioritisation | `POAssistAgent.prioritise_backlog_repository()` or `prioritise_backlog()` ranks items using WSJF, dependency penalties, and status checks. | Ordered `PrioritizedBacklogItem` list for planning. |
 | Meeting Analysis | `POAssistAgent.register_meeting()` persists `MeetingRecord`s with summaries, action items, risks, and clarity gaps. | `MeetingRecord` accessible via `recent_meetings()`. |
 | Sprint Planning | `POAssistAgent.plan_next_sprint()` composes prioritisation with capacity-aware selection. | `SprintPlan` containing committed items, total points, and planning notes. |
+| Roadmap Visualisation | `POAssistAgent.build_roadmap()` organises prioritised work into quarterly buckets based on capacity. | `RoadmapTimeline` with markdown rendering support. |
+| Integrations | `POAssistAgent.sync_backlog_item()`/`broadcast_meeting()`/`announce_sprint_plan()` push artefacts to Jira, Slack, and documentation connectors. | `IntegrationResult` records for auditability. |
+| Preview Snapshots | `build_preview()` aggregates backlog, meetings, sprint plan, and roadmap into a single markdown digest. | Shareable markdown summary. |
 
 ## Usage Walkthrough
 
@@ -58,17 +69,33 @@ for entry in plan.committed_items:
     print(entry.rank, entry.item.identifier, entry.item.title)
 ```
 
-### Previewing the Workflow
-
-To generate a shareable snapshot of the current backlog, recent meetings, and sprint plan, call the preview helper:
+### Natural Language Ingestion
 
 ```python
-from poa_app import build_preview, POAssistAgent
+from poa_app import parse_product_idea
 
-agent = POAssistAgent()
-# populate the agent using capture_idea / register_meeting...
+description = """
+Title: Persona insights dashboard
+As a product owner, I want to review persona coverage so that gaps are visible.
+Constraints: Connect to Jira, Share summaries to Slack
+Tags: insights, alignment
+Impact: 8
+"""
 
-preview = build_preview(agent)
+parsed = parse_product_idea(description)
+print(parsed.idea.goal)  # => review persona coverage
+```
+
+### Roadmap and Previewing the Workflow
+
+```python
+from poa_app import build_preview
+
+preview = build_preview(
+    agent,
+    capacity=SprintCapacity(available_points=20),
+    roadmap_capacities=(("Q1", 20), ("Q2", 18)),
+)
 print(preview.as_markdown())
 ```
 
@@ -78,10 +105,24 @@ For a ready-to-run demo seeded with sample data use:
 python -m poa_app.preview
 ```
 
+## Integrations
+
+The `IntegrationHub` bundles lightweight connectors that simulate syncing artefacts to Jira, Slack, and Notion/Confluence-style documentation. Each sync method returns `IntegrationResult` records so downstream services can audit behaviour or surface notifications.
+
+```python
+from poa_app import IntegrationHub
+
+hub = IntegrationHub()
+results = hub.sync_story(item)
+for result in results:
+    print(result.destination, result.status)
+```
+
 ## Next Steps
 
 - Wire the repositories to persistent storage (PostgreSQL or Airtable) so the agent can run in a multi-user environment.
 - Extend the meeting analysis module to propose follow-up backlog entries automatically.
 - Provide API/CLI layers that expose the facade within Slack or Jira automation scripts.
 - Integrate velocity history and dependency graphs for more accurate sprint forecasting.
+- Replace simulated integrations with production-grade API clients.
 

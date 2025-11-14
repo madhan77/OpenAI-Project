@@ -4,6 +4,14 @@ from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
 from .agent import POAssistAgent
+from .ingestion import ParsedIdea, parse_meeting_notes, parse_product_idea
+from .integrations import (
+    DocumentationPublisher,
+    IntegrationHub,
+    IntegrationResult,
+    JiraConnector,
+    SlackConnector,
+)
 from .models import (
     AcceptanceCriterion,
     BacklogItem,
@@ -18,6 +26,7 @@ from .models import (
     UserStory,
 )
 from .repository import BacklogRepository, MeetingLog
+from .roadmap import RoadmapEntry, RoadmapTimeline, build_roadmap
 
 if TYPE_CHECKING:  # pragma: no cover - imported for static analysis only
     from .preview import PreviewSnapshot, build_preview, demo_preview
@@ -39,6 +48,17 @@ __all__ = [
     "UserStory",
     "BacklogRepository",
     "MeetingLog",
+    "ParsedIdea",
+    "parse_product_idea",
+    "parse_meeting_notes",
+    "IntegrationHub",
+    "IntegrationResult",
+    "JiraConnector",
+    "SlackConnector",
+    "DocumentationPublisher",
+    "RoadmapEntry",
+    "RoadmapTimeline",
+    "build_roadmap",
     *_LAZY_EXPORTS,
 ]
 

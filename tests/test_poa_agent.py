@@ -6,12 +6,19 @@ from poa_app import (
     BacklogItem,
     BacklogItemMetrics,
     BacklogRepository,
+    DocumentationPublisher,
+    IntegrationHub,
     MeetingLog,
     MeetingTranscript,
     POAssistAgent,
+    ParsedIdea,
     ProductIdea,
+    RoadmapTimeline,
     SprintCapacity,
     build_preview,
+    build_roadmap,
+    parse_meeting_notes,
+    parse_product_idea,
 )
 from poa_app.evaluation import evaluate_product_idea
 
@@ -37,6 +44,42 @@ def test_generate_user_story_structure() -> None:
         for criterion in story.acceptance_criteria
     )
     assert "Risk review" in story.definition_of_done[-1]
+
+
+def test_parse_product_idea_from_text() -> None:
+    text = (
+        "Title: Unified sprint board\n"
+        "As a scrum master, I want to visualise cross-team work so that dependencies are clear.\n"
+        "Constraints: Integrate Jira; Must support PI Planning\n"
+        "Tags: visibility, #planning\n"
+        "Impact: 9\n"
+        "Effort: 5\n"
+    )
+
+    parsed: ParsedIdea = parse_product_idea(text)
+
+    assert parsed.idea.persona == "scrum master"
+    assert "Integrate Jira" in parsed.idea.constraints[0]
+    assert parsed.idea.tags == ("visibility", "planning")
+    assert parsed.idea.impact == 9
+    assert parsed.notes
+
+
+def test_parse_meeting_notes_creates_transcript() -> None:
+    notes = (
+        "Attendees: PO, Eng Lead\n"
+        "Goals: Align roadmap\n"
+        "Discussion: Reviewed dashboard; Highlighted reporting gaps\n"
+        "Decisions: Proceed with MVP\n"
+        "Questions: Who owns QA?\n"
+        "Risks: Data freshness\n"
+    )
+
+    transcript = parse_meeting_notes(notes)
+
+    assert "PO" in transcript.attendees
+    assert "Reviewed dashboard" in transcript.discussion_points[0]
+    assert transcript.open_questions == ("Who owns QA?",)
 
 
 def test_evaluate_product_idea_applies_keyword_heuristics() -> None:
@@ -112,7 +155,8 @@ def test_meeting_analysis_returns_tasks() -> None:
 def test_capture_idea_and_plan_sprint_flow() -> None:
     backlog = BacklogRepository()
     meetings = MeetingLog()
-    agent = POAssistAgent(backlog_repository=backlog, meeting_log=meetings)
+    integrations = IntegrationHub(documentation=DocumentationPublisher())
+    agent = POAssistAgent(backlog_repository=backlog, meeting_log=meetings, integrations=integrations)
 
     idea = ProductIdea(
         title="Roadmap heatmap",
@@ -152,8 +196,55 @@ def test_capture_idea_and_plan_sprint_flow() -> None:
     assert any(entry.item.identifier == item.identifier for entry in plan.committed_items)
     assert plan.capacity == pytest.approx(13, abs=1)
 
+    results = agent.sync_backlog_item(item.identifier)
+    assert any(result.destination == "jira" for result in results)
 
-def test_preview_snapshot_provides_markdown_summary() -> None:
+
+def test_log_meeting_notes_and_broadcast() -> None:
+    integrations = IntegrationHub()
+    agent = POAssistAgent(integrations=integrations)
+
+    notes = (
+        "Attendees: PO, Eng Lead\n"
+        "Discussion: Prioritisation workflow; Preview mock\n"
+        "Decisions: Roll preview to pilot team\n"
+    )
+
+    record = agent.log_meeting_notes("sync-002", notes)
+    assert record.analysis.action_items
+
+    sync_results = agent.broadcast_meeting("sync-002")
+    assert any(result.destination == "slack" for result in sync_results)
+
+
+def test_build_roadmap_distributes_work() -> None:
+    agent = POAssistAgent()
+
+    for index in range(1, 6):
+        idea = ProductIdea(
+            title=f"Capability {index}",
+            persona="product owner",
+            goal="ship incremental value",
+            benefit="stakeholders stay aligned",
+            description="Short enhancement",
+        )
+        item = agent.capture_idea(f"POA-{index}", idea)
+        agent.update_item_status(item.identifier, "ready")
+
+    prioritized = agent.prioritise_backlog_repository()
+    roadmap: RoadmapTimeline = build_roadmap(
+        prioritized,
+        capacities=(
+            ("Q1", 3),
+            ("Q2", 3),
+        ),
+    )
+
+    assert roadmap.entries[0].items
+    assert roadmap.backlog
+
+
+def test_preview_snapshot_provides_markdown_summary_with_roadmap() -> None:
     backlog = BacklogRepository()
     meetings = MeetingLog()
     agent = POAssistAgent(backlog_repository=backlog, meeting_log=meetings)
@@ -180,10 +271,26 @@ def test_preview_snapshot_provides_markdown_summary() -> None:
         ),
     )
 
-    preview = build_preview(agent, capacity=SprintCapacity(available_points=12))
+    preview = build_preview(
+        agent,
+        capacity=SprintCapacity(available_points=12),
+        roadmap_capacities=(("Q1", 10),),
+    )
     summary = preview.as_markdown()
 
     assert "PO Assist Preview" in summary
     assert "POA-301" in summary
     assert "retro-sync" in summary
     assert "Capacity" in summary
+    assert "Roadmap Overview" in summary
+
+
+def test_ingest_raw_idea_returns_parsed_metadata() -> None:
+    agent = POAssistAgent()
+    item, parsed = agent.ingest_raw_idea(
+        "POA-999",
+        "As a product owner, I want to highlight risks so that we can course correct early.",
+    )
+
+    assert item.identifier == "POA-999"
+    assert parsed.notes

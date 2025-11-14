@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence, Tuple
 
 from .agent import POAssistAgent
 from .models import (
@@ -13,6 +13,7 @@ from .models import (
     SprintCapacity,
     SprintPlan,
 )
+from .roadmap import RoadmapTimeline, build_roadmap
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,7 @@ class PreviewSnapshot:
     prioritized_backlog: Sequence[PrioritizedBacklogItem]
     meetings: Sequence[MeetingRecord]
     sprint_plan: SprintPlan
+    roadmap: RoadmapTimeline | None = None
 
     def as_markdown(self) -> str:
         """Return a lightweight markdown summary for quick stakeholder previews."""
@@ -69,6 +71,10 @@ class PreviewSnapshot:
             for note in plan.notes:
                 lines.append(f"- {note}")
 
+        if self.roadmap:
+            lines.append("")
+            lines.append(self.roadmap.as_markdown())
+
         return "\n".join(lines)
 
 
@@ -78,12 +84,16 @@ def build_preview(
     capacity: SprintCapacity | None = None,
     backlog_limit: int = 5,
     include_meetings: bool = True,
+    roadmap_capacities: Sequence[Tuple[str, int]] | None = None,
 ) -> PreviewSnapshot:
     """Generate a snapshot using the agent's current repositories."""
 
-    prioritized: Sequence[PrioritizedBacklogItem] = agent.prioritise_backlog_repository()
+    prioritized_all: Sequence[PrioritizedBacklogItem] = agent.prioritise_backlog_repository()
+    prioritized: Sequence[PrioritizedBacklogItem]
     if backlog_limit > 0:
-        prioritized = prioritized[:backlog_limit]
+        prioritized = prioritized_all[:backlog_limit]
+    else:
+        prioritized = prioritized_all
 
     meetings: Sequence[MeetingRecord]
     if include_meetings:
@@ -92,12 +102,17 @@ def build_preview(
         meetings = ()
 
     planning_capacity = capacity or SprintCapacity(available_points=20)
-    plan = agent.recommend_sprint_plan(prioritized, planning_capacity)
+    plan = agent.recommend_sprint_plan(prioritized_all, planning_capacity)
+
+    roadmap: RoadmapTimeline | None = None
+    if roadmap_capacities:
+        roadmap = build_roadmap(prioritized_all, roadmap_capacities)
 
     return PreviewSnapshot(
         prioritized_backlog=prioritized,
         meetings=meetings,
         sprint_plan=plan,
+        roadmap=roadmap,
     )
 
 
@@ -144,9 +159,22 @@ def demo_preview(agent: POAssistAgent | None = None) -> PreviewSnapshot:
         ),
     )
 
-    return build_preview(
-        working_agent,
-        capacity=SprintCapacity(available_points=16, focus_factor=0.75),
+    roadmap = build_roadmap(
+        working_agent.prioritise_backlog_repository(),
+        capacities=(
+            ("Q1", 16),
+            ("Q2", 20),
+            ("Q3", 18),
+        ),
+    )
+
+    return PreviewSnapshot(
+        prioritized_backlog=working_agent.prioritise_backlog_repository(),
+        meetings=working_agent.recent_meetings(limit=5),
+        sprint_plan=working_agent.plan_next_sprint(
+            SprintCapacity(available_points=16, focus_factor=0.75)
+        ),
+        roadmap=roadmap,
     )
 
 

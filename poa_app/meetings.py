@@ -1,4 +1,4 @@
-"""Meeting analysis helpers."""
+"""Meeting analysis heuristics for the PO Assist Agent."""
 from __future__ import annotations
 
 from typing import List
