@@ -3,13 +3,12 @@ from __future__ import annotations
 
 from typing import Iterable, Sequence
 
-
-from poa_app.evaluation import evaluate_product
-from poa_app.generators import generate_user_story
-from poa_app.ingestion import ParsedIdea, parse_meeting_notes, parse_product_idea
-from poa_app.integrations import IntegrationHub, IntegrationResult
-from poa_app.meetings import analyze_meeting
-from poa_app.models import (
+from .evaluation import evaluate_product_idea
+from .generators import generate_user_story
+from .ingestion import ParsedIdea, parse_meeting_notes, parse_product_idea
+from .integrations import IntegrationHub, IntegrationResult
+from .meetings import analyze_meeting
+from .models import (
     BacklogItem,
     MeetingAnalysis,
     MeetingRecord,
@@ -20,10 +19,10 @@ from poa_app.models import (
     SprintPlan,
     UserStory,
 )
-from poa_app.prioritizer import prioritize_backlog
-from poa_app.repository import BacklogRepository, MeetingLog
-from poa_app.roadmap import RoadmapTimeline, build_roadmap
-from poa_app.sprint_planning import suggest_sprint_plan
+from .prioritizer import prioritize_backlog
+from .repository import BacklogRepository, MeetingLog
+from .roadmap import RoadmapTimeline, build_roadmap
+from .sprint_planning import suggest_sprint_plan
 
 
 class POAssistAgent:
@@ -46,7 +45,7 @@ class POAssistAgent:
 
         return generate_user_story(idea)
 
-    def ingest_raw_idea(self, identifier: str, description: str) -> Tuple[BacklogItem, ParsedIdea]:
+    def ingest_raw_idea(self, identifier: str, description: str) -> tuple[BacklogItem, ParsedIdea]:
         """Parse a natural-language idea and store it in the backlog."""
 
         parsed = parse_product_idea(description)
