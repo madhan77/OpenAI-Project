@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Sequence, Tuple
 
-from .agent import POAssistAgent
+from poa_app.agent import POAssistAgent
 from .models import (
     MeetingTranscript,
     ProductIdea,

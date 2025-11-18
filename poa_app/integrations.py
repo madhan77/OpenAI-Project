@@ -20,25 +20,34 @@ class IntegrationResult:
 class JiraConnector:
     """Simulated Jira integration capturing pushed backlog items."""
 
-    def __init__(self) -> None:
-        self.synced_items: List[BacklogItem] = []
-
-    def push_story(self, item: BacklogItem) -> IntegrationResult:
-        self.synced_items.append(item)
-        return IntegrationResult(
-            destination="jira",
-            identifier=item.identifier,
-            status="queued",
-            message="Story synced to Jira backlog.",
-        )
-
+    def __init__(
+        self,
+        project_key: str = "POA",
+        base_url: str | None = None,
+        transport: Callable[[Dict[str, Any]], None] | None = None,
+    ) -> None:
+        self.synced_items = []
+        self.issue_payloads = []
+        self._project_key = project_key
+        self._base_url = base_url or os.environ.get("POA_JIRA_BASE_URL")
+        self._transport = transport
 
 class SlackConnector:
-    """Simulated Slack integration recording posted messages."""
+    """Slack integration that can either mock or call a webhook."""
 
-    def __init__(self) -> None:
-        self.messages: List[str] = []
-
+    def __init__(
+        self,
+        channel: str = "#all-openai-project",
+        webhook_url: str | None = None,
+        timeout: float = 5.0,
+        transport: Callable[[Dict[str, str]], None] | None = None,
+    ) -> None:
+        self.channel = channel
+        self._webhook_url = webhook_url or os.environ.get("POA_SLACK_WEBHOOK_URL")
+        print(f"[SlackConnector] Using webhook URL: {self._webhook_url}")
+        self._timeout = timeout
+        self._transport = transport
+        self.messages = []
     def post_story_sync(self, item: BacklogItem) -> IntegrationResult:
         message = (
             f"Story {item.identifier} — {item.title} shared with engineering channel."
