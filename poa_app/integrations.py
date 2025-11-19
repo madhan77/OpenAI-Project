@@ -22,17 +22,21 @@ class IntegrationResult:
 class JiraConnector:
     """Simulated Jira integration capturing pushed backlog items. Accepts base_url for API compatibility."""
 
-    def __init__(self, base_url: str | None = None) -> None:
+    def __init__(self, base_url: str | None = None, email: str | None = None, api_token: str | None = None, project_key: str | None = None) -> None:
         self.synced_items: List[BacklogItem] = []
         self.base_url = base_url or os.getenv("JIRA_BASE_URL")
+        self.email = email or os.getenv("JIRA_EMAIL")
+        self.api_token = api_token or os.getenv("JIRA_API_TOKEN")
+        self.project_key = project_key or os.getenv("JIRA_PROJECT_KEY")
 
     def push_story(self, item: BacklogItem) -> IntegrationResult:
         self.synced_items.append(item)
+        # For real integration, would use self.email and self.api_token for authentication
         return IntegrationResult(
             destination="jira",
             identifier=item.identifier,
             status="queued",
-            message=f"Story synced to Jira backlog. (base_url={self.base_url})",
+            message=f"Story synced to Jira backlog. (base_url={self.base_url}, email={self.email})",
         )
 
 
@@ -137,7 +141,12 @@ class DocumentationPublisher:
 class IntegrationHub:
     """Aggregates connectors to provide high-level sync operations."""
 
-    jira: JiraConnector = field(default_factory=lambda: JiraConnector(base_url=os.getenv("JIRA_BASE_URL")))
+    jira: JiraConnector = field(default_factory=lambda: JiraConnector(
+        base_url=os.getenv("JIRA_BASE_URL"),
+        email=os.getenv("JIRA_EMAIL"),
+        api_token=os.getenv("JIRA_API_TOKEN"),
+        project_key=os.getenv("JIRA_PROJECT_KEY")
+    ))
     slack: SlackConnector = field(default_factory=SlackConnector)
     documentation: DocumentationPublisher = field(default_factory=DocumentationPublisher)
 
