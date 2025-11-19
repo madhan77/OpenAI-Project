@@ -30,14 +30,60 @@ class JiraConnector:
         self.project_key = project_key or os.getenv("JIRA_PROJECT_KEY")
 
     def push_story(self, item: BacklogItem) -> IntegrationResult:
+        import requests
         self.synced_items.append(item)
-        # For real integration, would use self.email and self.api_token for authentication
-        return IntegrationResult(
-            destination="jira",
-            identifier=item.identifier,
-            status="queued",
-            message=f"Story synced to Jira backlog. (base_url={self.base_url}, email={self.email})",
-        )
+        # Debug output for credentials
+        print(f"[JiraConnector] Using email: {self.email}")
+        print(f"[JiraConnector] Using api_token: {self.api_token[:4]}...{'*' * (len(self.api_token)-4) if self.api_token else ''}")
+        if not (self.base_url and self.email and self.api_token and self.project_key):
+            return IntegrationResult(
+                destination="jira",
+                identifier=item.identifier,
+                status="error",
+                message="Missing Jira credentials or config."
+            )
+        url = f"{self.base_url}/rest/api/3/issue"
+        auth = (self.email, self.api_token)
+        headers = {"Accept": "application/json", "Content-Type": "application/json"}
+        payload = {
+            "fields": {
+                "project": {"key": self.project_key},
+                "summary": item.title,
+                "description": item.story.narrative if item.story else "No description provided.",
+                "issuetype": {"name": "Task"}
+            }
+        }
+        try:
+            response = requests.post(url, json=payload, headers=headers, auth=auth)
+            if response.status_code == 201:
+                issue_key = response.json().get("key", "unknown")
+                return IntegrationResult(
+                    destination="jira",
+                    identifier=issue_key,
+                    status="created",
+                    message=f"Story created in Jira: {issue_key}"
+                )
+            elif response.status_code == 401:
+                return IntegrationResult(
+                    destination="jira",
+                    identifier=item.identifier,
+                    status="auth_failed",
+                    message="HTTP 401: Client must be authenticated to access this resource."
+                )
+            else:
+                return IntegrationResult(
+                    destination="jira",
+                    identifier=item.identifier,
+                    status="error",
+                    message=f"Jira API error: {response.status_code} {response.text}"
+                )
+        except Exception as e:
+            return IntegrationResult(
+                destination="jira",
+                identifier=item.identifier,
+                status="error",
+                message=f"Exception during Jira API call: {e}"
+            )
 
 
 class SlackConnector:
