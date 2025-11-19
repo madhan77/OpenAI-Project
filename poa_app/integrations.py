@@ -33,8 +33,13 @@ class JiraConnector:
         import requests
         self.synced_items.append(item)
         # Debug output for credentials
-        print(f"[JiraConnector] Using email: {self.email}")
-        print(f"[JiraConnector] Using api_token: {self.api_token[:4]}...{'*' * (len(self.api_token)-4) if self.api_token else ''}")
+        try:
+            import streamlit as st
+            st.write(f"[JiraConnector] Using email: {self.email}")
+            st.write(f"[JiraConnector] Using api_token: {self.api_token[:4]}...{'*' * (len(self.api_token)-4) if self.api_token else ''}")
+        except ImportError:
+            print(f"[JiraConnector] Using email: {self.email}")
+            print(f"[JiraConnector] Using api_token: {self.api_token[:4]}...{'*' * (len(self.api_token)-4) if self.api_token else ''}")
         if not (self.base_url and self.email and self.api_token and self.project_key):
             return IntegrationResult(
                 destination="jira",
