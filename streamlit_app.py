@@ -255,6 +255,29 @@ with col2:
 
 st.markdown("---")
 
+# Sidebar: Show loaded Jira credentials for verification
+with st.sidebar:
+    st.subheader("Jira Credentials Loaded")
+    from poa_app.integrations import IntegrationHub
+    hub = None
+    try:
+        hub = agent.integrations if hasattr(agent, 'integrations') else None
+    except Exception:
+        pass
+    if hub and hasattr(hub, 'jira'):
+        jira_connector = hub.jira
+        st.write(f"Email: {jira_connector.email}")
+        st.write(f"API Token: {jira_connector.api_token[:4]}...{'*' * (len(jira_connector.api_token)-4) if jira_connector.api_token else ''}")
+        st.write(f"Base URL: {jira_connector.base_url}")
+        st.write(f"Project Key: {jira_connector.project_key}")
+    else:
+        import os
+        st.write(f"Email: {os.getenv('JIRA_EMAIL')}")
+        token = os.getenv('JIRA_API_TOKEN')
+        st.write(f"API Token: {token[:4]}...{'*' * (len(token)-4) if token else ''}")
+        st.write(f"Base URL: {os.getenv('JIRA_BASE_URL')}")
+        st.write(f"Project Key: {os.getenv('JIRA_PROJECT_KEY')}")
+
 st.subheader("Prioritized Backlog")
 prioritized = agent.prioritise_backlog_repository()
 if not prioritized:
