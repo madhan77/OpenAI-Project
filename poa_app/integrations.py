@@ -137,7 +137,7 @@ class DocumentationPublisher:
 class IntegrationHub:
     """Aggregates connectors to provide high-level sync operations."""
 
-    jira: JiraConnector = field(default_factory=JiraConnector)
+    jira: JiraConnector = field(default_factory=lambda: JiraConnector(base_url=os.getenv("JIRA_BASE_URL")))
     slack: SlackConnector = field(default_factory=SlackConnector)
     documentation: DocumentationPublisher = field(default_factory=DocumentationPublisher)
 
