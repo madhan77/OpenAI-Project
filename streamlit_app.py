@@ -308,12 +308,23 @@ if prioritized_for_publish:
     col_a, col_b, col_c = st.columns(3)
     with col_a:
         if st.button("Publish selected item (Jira + Slack)", width='stretch'):
-            from slack_sdk import WebClient
-            client = WebClient(token=SLACK_BOT_TOKEN)
-            slack_message = f"Story {sel_id} published: {sel}"
-            response = client.chat_postMessage(channel=SLACK_CHANNEL, text=slack_message)
-            st.session_state["last_slack_response"] = response
-            st.success(f"Slack API response: {response['ok']} — {response['message']['text']}")
+            # Publish to Jira using agent integrations
+            item_to_publish = next(e.item for e in prioritized_for_publish if e.item.identifier == sel_id)
+            integration_results = agent.integrations.sync_story(item_to_publish, notify=True)
+            for result in integration_results:
+                if result.destination == "jira":
+                    st.write(f"Jira publish status: {result.status}")
+                    st.write(f"Jira message: {result.message}")
+                    # Show debug info for credentials
+                    jira_connector = agent.integrations.jira
+                    st.write(f"JiraConnector email: {jira_connector.email}")
+                    st.write(f"JiraConnector api_token: {jira_connector.api_token[:4]}...{'*' * (len(jira_connector.api_token)-4) if jira_connector.api_token else ''}")
+                    st.write(f"JiraConnector base_url: {jira_connector.base_url}")
+                    st.write(f"JiraConnector project_key: {jira_connector.project_key}")
+                    if result.status == "auth_failed":
+                        st.error("Jira authentication failed. Check credentials and environment variables.")
+                elif result.destination == "slack":
+                    st.success(f"Slack: {result.message}")
     # Announce sprint plan to Slack (+ Docs)
     with col_b:
         if st.button("Announce sprint plan", width='stretch'):
