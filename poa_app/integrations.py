@@ -20,6 +20,16 @@ class IntegrationResult:
 
 
 class JiraConnector:
+        # Log the exact request for debugging
+        try:
+            import streamlit as st
+            st.write(f"Jira API Request URL: {url}")
+            st.write(f"Jira API Request Headers: {headers}")
+            st.write(f"Jira API Request Payload: {payload}")
+        except ImportError:
+            print(f"Jira API Request URL: {url}")
+            print(f"Jira API Request Headers: {headers}")
+            print(f"Jira API Request Payload: {payload}")
     """Simulated Jira integration capturing pushed backlog items. Accepts base_url for API compatibility."""
 
     def __init__(self, base_url: str | None = None, email: str | None = None, api_token: str | None = None, project_key: str | None = None) -> None:
