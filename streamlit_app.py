@@ -308,15 +308,21 @@ if prioritized_for_publish:
     col_a, col_b, col_c = st.columns(3)
     with col_a:
         if st.button("Publish selected item (Jira + Slack)", width='stretch'):
-            results = agent.sync_backlog_item(sel_id, notify=True)
-            for r in results:
-                st.success(f"{r.destination}: {r.status} — {r.message}")
+            from slack_sdk import WebClient
+            client = WebClient(token=SLACK_BOT_TOKEN)
+            slack_message = f"Story {sel_id} published: {sel}"
+            response = client.chat_postMessage(channel=SLACK_CHANNEL, text=slack_message)
+            st.session_state["last_slack_response"] = response
+            st.success(f"Slack API response: {response['ok']} — {response['message']['text']}")
     # Announce sprint plan to Slack (+ Docs)
     with col_b:
         if st.button("Announce sprint plan", width='stretch'):
-            results = agent.announce_sprint_plan(plan)
-            for r in results:
-                st.success(f"{r.destination}: {r.status} — {r.message}")
+            from slack_sdk import WebClient
+            client = WebClient(token=SLACK_BOT_TOKEN)
+            slack_message = f"Sprint plan announced: {plan.total_points}/{plan.capacity} points."
+            response = client.chat_postMessage(channel=SLACK_CHANNEL, text=slack_message)
+            st.session_state["last_slack_response"] = response
+            st.success(f"Slack API response: {response['ok']} — {response['message']['text']}")
     # Post latest meeting summary to Slack (+ Docs)
     with col_c:
         recent = agent.recent_meetings(limit=1)
@@ -324,8 +330,11 @@ if prioritized_for_publish:
         disabled = latest_id is None
         if st.button("Post latest meeting summary", width='stretch', disabled=disabled):
             if latest_id:
-                results = agent.broadcast_meeting(latest_id)
-                for r in results:
-                    st.success(f"{r.destination}: {r.status} — {r.message}")
+                from slack_sdk import WebClient
+                client = WebClient(token=SLACK_BOT_TOKEN)
+                slack_message = f"Meeting summary posted for {latest_id}."
+                response = client.chat_postMessage(channel=SLACK_CHANNEL, text=slack_message)
+                st.session_state["last_slack_response"] = response
+                st.success(f"Slack API response: {response['ok']} — {response['message']['text']}")
 else:
     st.info("No backlog items to publish yet. Seed demo data or add an idea.")
