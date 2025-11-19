@@ -18,19 +18,21 @@ class IntegrationResult:
 
 
 class JiraConnector:
-    """Simulated Jira integration capturing pushed backlog items."""
+    """Simulated Jira integration capturing pushed backlog items. Accepts base_url for API compatibility."""
 
-    def __init__(
-        self,
-        project_key: str = "POA",
-        base_url: str | None = None,
-        transport: Callable[[Dict[str, Any]], None] | None = None,
-    ) -> None:
-        self.synced_items = []
-        self.issue_payloads = []
-        self._project_key = project_key
-        self._base_url = base_url or os.environ.get("POA_JIRA_BASE_URL")
-        self._transport = transport
+    def __init__(self, base_url: str | None = None) -> None:
+        self.synced_items: List[BacklogItem] = []
+        self.base_url = base_url or os.getenv("JIRA_BASE_URL")
+
+    def push_story(self, item: BacklogItem) -> IntegrationResult:
+        self.synced_items.append(item)
+        return IntegrationResult(
+            destination="jira",
+            identifier=item.identifier,
+            status="queued",
+            message=f"Story synced to Jira backlog. (base_url={self.base_url})",
+        )
+
 
 class SlackConnector:
     """Slack integration that can either mock or call a webhook."""
@@ -48,6 +50,7 @@ class SlackConnector:
         self._timeout = timeout
         self._transport = transport
         self.messages = []
+
     def post_story_sync(self, item: BacklogItem) -> IntegrationResult:
         message = (
             f"Story {item.identifier} — {item.title} shared with engineering channel."
