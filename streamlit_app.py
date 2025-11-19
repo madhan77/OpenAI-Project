@@ -1,12 +1,6 @@
-# ...existing code...# ...existing code..."""Streamlit prototype UI for the Product Owner Assist Agent.
+"""Streamlit prototype UI for the Product Owner Assist Agent.
 
-# This is the latest safe version of streamlit_app.py with no hardcoded secrets.
-
-# ...existing code...# This is the latest safe version of streamlit_app.py with no hardcoded secrets.
-
-
-# ...existing code...Launch from the repo root:
-
+Launch from the repo root:
   streamlit run streamlit_app.py
 """
 from __future__ import annotations
