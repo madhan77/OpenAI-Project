@@ -8,6 +8,10 @@ from __future__ import annotations
 import itertools
 from typing import Sequence
 import os
+import streamlit as st
+if "last_slack_response" in st.session_state:
+    st.markdown("## Slack API full response (persistent debug)")
+    st.json(st.session_state["last_slack_response"])
 
 import streamlit as st
 
@@ -127,7 +131,10 @@ with st.sidebar:
             st.success("Seeded demo backlog items and a meeting.")
 
     # Quick integrations status hint
-    slack_enabled = bool(os.getenv("SLACK_BOT_TOKEN") and os.getenv("SLACK_CHANNEL"))
+    SLACK_BOT_TOKEN = st.secrets["SLACK_BOT_TOKEN"] if "SLACK_BOT_TOKEN" in st.secrets else None
+    SLACK_CHANNEL = st.secrets["SLACK_CHANNEL"] if "SLACK_CHANNEL" in st.secrets else None
+    slack_enabled = bool(SLACK_BOT_TOKEN and SLACK_CHANNEL)
+    st.info(f"Slack secrets loaded: token={'yes' if SLACK_BOT_TOKEN else 'no'}, channel={'yes' if SLACK_CHANNEL else 'no'}")
     jira_enabled = all(os.getenv(k) for k in ("JIRA_BASE_URL", "JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_PROJECT_KEY"))
     st.caption(
         f"Integrations → Slack: {'real' if slack_enabled else 'simulated'} • Jira: {'real' if jira_enabled else 'simulated'}"
@@ -150,10 +157,20 @@ with st.sidebar:
 
                 empty_plan = SprintPlan(committed_items=(), total_points=0, capacity=0)
                 try:
-                    results = agent.announce_sprint_plan(empty_plan)
-                    for r in results:
-                        if r.destination == "slack":
-                            st.success(f"Slack: {r.status} — {r.message}")
+                    from slack_sdk import WebClient
+                    client = WebClient(token=SLACK_BOT_TOKEN)
+                    import datetime
+                    unique_text = f"Test message from POA app (Streamlit) at {datetime.datetime.now().isoformat()}"
+                    response = client.chat_postMessage(channel=SLACK_CHANNEL, text=unique_text)
+                    st.session_state["last_slack_response"] = response
+                    st.markdown("## Slack API full response (debug)")
+                    st.json(response)
+                    st.write(f"Posted to channel: {SLACK_CHANNEL}")
+                    st.write(f"Bot user: {response.get('message', {}).get('user', 'N/A')}")
+                    if not response["ok"]:
+                        st.error(f"Slack API error: {response.get('error', 'Unknown error')}")
+                    else:
+                        st.success(f"Slack API response: {response['ok']} — {response['message']['text']}")
                 except Exception as e:
                     st.error(f"Slack test failed: {e}")
         with d_cols[1]:
