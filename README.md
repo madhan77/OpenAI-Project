@@ -50,10 +50,12 @@ This repository contains a reference implementation of a health claims processin
   python -m http.server 4173
   ```
   Then open [http://localhost:4173](http://localhost:4173) in your browser.
+- **Firebase Hosting:** Use the shared hosting configuration to deploy the static prototype with `firebase deploy --only hosting:fieldService` after mapping the `fieldService` target to your site ID. See [Firebase Hosting Deployment Guide](docs/firebase-hosting.md).
 
 ## Documentation
 - [PRD](docs/claims-processing-prd.md)
 - [Application Architecture](docs/claims-processing-app.md)
+- [Firebase Hosting Deployment Guide](docs/firebase-hosting.md)
 
 ## Project Structure
 ```
