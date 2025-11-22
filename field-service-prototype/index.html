@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Field Service Prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Prototype · Mock Data</p>
+      <h1>Field Service Operations</h1>
+      <p class="subtitle">Appointments, tasks, and on-site execution for technicians, engineers, and coordinators.</p>
+    </div>
+    <div class="filters">
+      <label>
+        Status
+        <select id="status-filter">
+          <option value="all">All</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="En Route">En Route</option>
+          <option value="On Site">On Site</option>
+          <option value="Completed">Completed</option>
+          <option value="Deferred">Deferred</option>
+        </select>
+      </label>
+      <label>
+        Technician
+        <select id="technician-filter">
+          <option value="all">All</option>
+        </select>
+      </label>
+      <label class="search-label">
+        <span>Search</span>
+        <input id="search-input" type="text" placeholder="WO-, customer, or site" />
+      </label>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel summary">
+      <h2>Live Snapshot</h2>
+      <div id="snapshot-grid" class="grid"></div>
+    </section>
+
+    <section class="panel list">
+      <div class="panel-header">
+        <h2>Appointment Board</h2>
+        <p class="microcopy">Demo data refreshes on load · Time windows shown in local time</p>
+      </div>
+      <div id="appointment-list" class="list-body"></div>
+    </section>
+
+    <section class="panel detail">
+      <div class="panel-header">
+        <h2>Work Order Detail</h2>
+        <p class="microcopy">Guided view for field workers and coordinators</p>
+      </div>
+      <div id="detail"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Static prototype with mock appointments, tasks, parts, and timeline events.</span>
+  </footer>
+
+  <script type="module" src="mock-data.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
