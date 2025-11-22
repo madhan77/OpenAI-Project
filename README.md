@@ -42,6 +42,15 @@ This repository contains a reference implementation of a health claims processin
 - **Local development:** [http://localhost:5173/](http://localhost:5173/) (after starting a static server in the `portal/` directory).
 - **Firebase Hosting:** `https://<your-project-id>.web.app/` or `https://<your-project-id>.firebaseapp.com/` once you deploy the `/portal` folder to your Firebase project. Replace `<your-project-id>` with the identifier from your Firebase console.
 
+## Field Service Prototype (Mock Data)
+- **Purpose:** Demo experience for field service coordinators and technicians to explore appointments, checklist completion, materials, timelines, and customer handoff data.
+- **Run locally:**
+  ```bash
+  cd field-service-prototype
+  python -m http.server 4173
+  ```
+  Then open [http://localhost:4173](http://localhost:4173) in your browser.
+
 ## Documentation
 - [PRD](docs/claims-processing-prd.md)
 - [Application Architecture](docs/claims-processing-app.md)
