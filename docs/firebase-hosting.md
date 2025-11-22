@@ -13,15 +13,15 @@ This project includes two static experiences you can deploy to Firebase Hosting:
 1. Authenticate and select the project:
    ```bash
    firebase login
-   firebase use <your-project-id>
+   firebase use open-ai-project-723a7
    ```
 2. Map hosting targets to your site IDs (run once per machine):
    ```bash
-   firebase target:apply hosting portal <portal-site-id>
-   firebase target:apply hosting fieldService <field-service-site-id>
+   firebase target:apply hosting portal open-ai-project-723a7
+   firebase target:apply hosting fieldService open-ai-project-723a7
    ```
-   - If you prefer a single hosting site, map both targets to the same site ID.
-3. Update `.firebaserc` and replace `your-firebase-project-id` with your project ID.
+   - If you prefer a separate hosting site, replace the IDs above with your preferred site IDs.
+3. `.firebaserc` is preconfigured with the provided project and hosting targets (portal/fieldService) mapped to `open-ai-project-723a7`. Adjust the mapping if you plan to use different site IDs.
 
 ## Deploy
 To deploy both experiences:

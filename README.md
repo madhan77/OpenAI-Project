@@ -40,7 +40,7 @@ This repository contains a reference implementation of a health claims processin
 
 ## Portal Login Link
 - **Local development:** [http://localhost:5173/](http://localhost:5173/) (after starting a static server in the `portal/` directory).
-- **Firebase Hosting:** `https://<your-project-id>.web.app/` or `https://<your-project-id>.firebaseapp.com/` once you deploy the `/portal` folder to your Firebase project. Replace `<your-project-id>` with the identifier from your Firebase console.
+- **Firebase Hosting:** `https://open-ai-project-723a7.web.app/` or `https://open-ai-project-723a7.firebaseapp.com/` once you deploy the `/portal` folder to the provided Firebase project.
 
 ## Field Service Prototype (Mock Data)
 - **Purpose:** Demo experience for field service coordinators and technicians to explore appointments, checklist completion, materials, timelines, and customer handoff data.
@@ -50,7 +50,7 @@ This repository contains a reference implementation of a health claims processin
   python -m http.server 4173
   ```
   Then open [http://localhost:4173](http://localhost:4173) in your browser.
-- **Firebase Hosting:** Use the shared hosting configuration to deploy the static prototype with `firebase deploy --only hosting:fieldService` after mapping the `fieldService` target to your site ID. See [Firebase Hosting Deployment Guide](docs/firebase-hosting.md).
+- **Firebase Hosting:** Use the shared hosting configuration to deploy the static prototype with `firebase deploy --only hosting:fieldService` after mapping the `fieldService` target to your site ID (pre-set to `open-ai-project-723a7`). See [Firebase Hosting Deployment Guide](docs/firebase-hosting.md).
 
 ## Documentation
 - [PRD](docs/claims-processing-prd.md)

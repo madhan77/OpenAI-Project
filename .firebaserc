@@ -1,5 +1,13 @@
 {
   "projects": {
-    "default": "your-firebase-project-id"
+    "default": "open-ai-project-723a7"
+  },
+  "targets": {
+    "open-ai-project-723a7": {
+      "hosting": {
+        "portal": ["open-ai-project-723a7"],
+        "fieldService": ["open-ai-project-723a7"]
+      }
+    }
   }
 }
