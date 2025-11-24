@@ -1,5 +1,138 @@
 import { appointments, technicians } from './mock-data.js';
 
+// --- Leaderboard Logic ---
+const leaderboardContainer = document.getElementById('leaderboard-list');
+
+function calculateLeaderboard() {
+  // Points: Only for completed jobs with customer feedback (survey === 'Completed')
+  // Badge: Awarded for each completed job with feedback
+  const pointsPerJob = 100;
+  const badgeEmoji = '🏅';
+  const leaderboard = technicians.map((tech) => {
+    const jobs = appointments.filter(
+      (appt) =>
+        appt.technician === tech.id &&
+        appt.status === 'Completed' &&
+        appt.customerHandoff &&
+        appt.customerHandoff.survey === 'Completed'
+    );
+    const points = jobs.length * pointsPerJob;
+    const badges = badgeEmoji.repeat(jobs.length);
+    // Progress toward next badge (show as percent)
+    const allJobs = appointments.filter((appt) => appt.technician === tech.id);
+    const completedWithFeedback = jobs.length;
+    const totalCompleted = allJobs.filter((appt) => appt.status === 'Completed').length;
+    // Progress: completed jobs with feedback / total completed jobs (if any), else 0
+    let progress = 0;
+    if (totalCompleted > 0) {
+      progress = Math.round((completedWithFeedback / totalCompleted) * 100);
+    }
+    return {
+      id: tech.id,
+      name: tech.name,
+      region: tech.region,
+      points,
+      badges,
+      progress
+    };
+  });
+  // Sort by points descending
+  leaderboard.sort((a, b) => b.points - a.points);
+  return leaderboard;
+}
+
+function renderLeaderboard() {
+  const leaderboard = calculateLeaderboard();
+  leaderboardContainer.innerHTML = leaderboard
+    .map(
+      (user, idx) => `
+        <div class="leaderboard-row">
+          <span class="rank">${idx + 1}</span>
+          <span class="name">${user.name} <span class="region">(${user.region})</span></span>
+          <span class="points">${user.points} pts</span>
+          <span class="badges">${user.badges}</span>
+        </div>
+        <div class="leaderboard-progress">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:${user.progress}%;"></div>
+          </div>
+          <span class="progress-label">${user.progress}% toward next badge</span>
+        </div>
+      `
+    )
+    .join('');
+}
+// --- User Profile Logic ---
+const profileBtn = document.getElementById('profile-btn');
+const profileModal = document.getElementById('profile-modal');
+const closeProfileModal = document.getElementById('close-profile-modal');
+const profileForm = document.getElementById('profile-form');
+const profileName = document.getElementById('profile-name');
+const profileEmail = document.getElementById('profile-email');
+const profileAvatar = document.getElementById('profile-avatar');
+const avatarPreview = document.getElementById('avatar-preview');
+const hasProfileUI =
+  profileBtn &&
+  profileModal &&
+  closeProfileModal &&
+  profileForm &&
+  profileName &&
+  profileEmail &&
+  profileAvatar &&
+  avatarPreview;
+
+function loadProfile() {
+  const data = JSON.parse(localStorage.getItem('userProfile')) || {
+    name: 'Technician User',
+    email: 'user@example.com',
+    avatar: ''
+  };
+  profileName.value = data.name;
+  profileEmail.value = data.email;
+  profileAvatar.value = data.avatar;
+  avatarPreview.src = data.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name);
+}
+
+function saveProfile(e) {
+  e.preventDefault();
+  const data = {
+    name: profileName.value,
+    email: profileEmail.value,
+    avatar: profileAvatar.value
+  };
+  localStorage.setItem('userProfile', JSON.stringify(data));
+  avatarPreview.src = data.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name);
+  closeProfile();
+}
+
+function openProfile() {
+  loadProfile();
+  profileModal.style.display = 'flex';
+}
+
+function closeProfile() {
+  profileModal.style.display = 'none';
+}
+
+if (hasProfileUI) {
+  profileBtn.addEventListener('click', openProfile);
+  closeProfileModal.addEventListener('click', closeProfile);
+  profileForm.addEventListener('submit', saveProfile);
+  profileAvatar.addEventListener('input', () => {
+    avatarPreview.src = profileAvatar.value || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(profileName.value);
+  });
+  profileName.addEventListener('input', () => {
+    if (!profileAvatar.value) {
+      avatarPreview.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(profileName.value);
+    }
+  });
+  window.addEventListener('click', (e) => {
+    if (e.target === profileModal) closeProfile();
+  });
+} else {
+  console.warn('Profile UI elements missing; skipping profile modal setup.');
+}
+
 const statusChipClass = {
   'Scheduled': 'chip info',
   'En Route': 'chip info',
@@ -94,40 +227,38 @@ function renderSnapshot() {
 function renderList() {
   const sorted = [...state.filtered].sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status));
 
+
   listContainer.innerHTML = sorted
     .map((appt) => {
       const tech = technicians.find((t) => t.id === appt.technician);
-      const active = appt.id === state.selectedId ? 'card active' : 'card';
+      const isActive = appt.id === state.selectedId;
+      const cardClass = `card transition cursor-pointer bg-slate-800/80 rounded-xl p-5 mb-4 shadow ${
+        isActive ? 'active ring-4 ring-blue-400 shadow-lg' : 'hover:ring-2 hover:ring-blue-300'
+      }`;
       const completedTasks = appt.tasks.filter((task) => task.status === 'done').length;
       const progress = Math.round((completedTasks / appt.tasks.length) * 100);
 
       return `
-        <article class="${active}" data-id="${appt.id}">
-          <div class="card-top">
+        <article class="${cardClass}" data-id="${appt.id}">
+          <div class="flex items-center justify-between mb-2">
             <div>
-              <p class="eyebrow">${appt.id}</p>
-              <h3>${appt.title}</h3>
-              <p class="microcopy">${appt.customer} · ${appt.site}</p>
+              <p class="uppercase text-xs text-blue-300 tracking-widest mb-1">${appt.id}</p>
+              <h3 class="text-lg font-bold text-white mb-1">${appt.title}</h3>
+              <p class="text-blue-200 text-sm">${appt.customer} · ${appt.site}</p>
             </div>
-            <span class="${statusChipClass[appt.status] || 'chip'}">${appt.status}</span>
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusChipClass[appt.status] || 'bg-slate-600 text-white'}">${appt.status}</span>
           </div>
-          <div class="card-body">
-            <div class="meta">
-              <div>
-                <p class="microcopy">Window</p>
-                <p>${appt.sla}</p>
-              </div>
-              <div>
-                <p class="microcopy">ETA</p>
-                <p>${appt.eta}</p>
-              </div>
-              <div>
-                <p class="microcopy">Technician</p>
-                <p>${tech?.name || 'Unassigned'}</p>
-              </div>
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex flex-col gap-1 text-xs text-blue-200">
+              <span><span class="font-semibold text-white">Window:</span> ${appt.sla}</span>
+              <span><span class="font-semibold text-white">ETA:</span> ${appt.eta}</span>
+              <span><span class="font-semibold text-white">Technician:</span> ${tech?.name || 'Unassigned'}</span>
             </div>
-            <div class="progress">
-              <div class="progress-bar" style="width:${progress}%"></div>
+            <div class="flex-1 flex flex-col items-end">
+              <div class="w-32 h-2 bg-slate-700 rounded-full overflow-hidden mb-1">
+                <div class="h-full bg-gradient-to-r from-blue-400 to-green-400 rounded-full" style="width:${progress}%"></div>
+              </div>
+              <span class="text-xs text-blue-300">${progress}% tasks</span>
             </div>
           </div>
         </article>
@@ -135,7 +266,7 @@ function renderList() {
     })
     .join('');
 
-  [...listContainer.querySelectorAll('.card')].forEach((card) => {
+  [...listContainer.querySelectorAll('[data-id]')].forEach((card) => {
     card.addEventListener('click', () => {
       state.selectedId = card.dataset.id;
       renderList();
@@ -156,44 +287,37 @@ function renderDetail() {
   const progress = Math.round((completedTasks / appointment.tasks.length) * 100);
 
   detailContainer.innerHTML = `
-    <div class="detail-header">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
       <div>
-        <p class="eyebrow">${appointment.id}</p>
-        <h3>${appointment.title}</h3>
-        <p class="microcopy">${appointment.customer} · ${appointment.site}</p>
+        <p class="uppercase text-xs text-blue-300 tracking-widest mb-1">${appointment.id}</p>
+        <h3 class="text-2xl font-bold text-white mb-1">${appointment.title}</h3>
+        <p class="text-blue-200 text-base">${appointment.customer} · ${appointment.site}</p>
       </div>
-      <div class="detail-meta">
-        <span class="${statusChipClass[appointment.status] || 'chip'}">${appointment.status}</span>
-        <div>
-          <p class="microcopy">Technician</p>
-          <p>${tech?.name} · ${tech?.role}</p>
-          <p class="microcopy">${tech?.phone}</p>
+      <div class="flex flex-col md:flex-row md:items-center gap-4">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusChipClass[appointment.status] || 'bg-slate-600 text-white'}">${appointment.status}</span>
+        <div class="flex flex-col text-xs text-blue-200">
+          <span><span class="font-semibold text-white">Technician:</span> ${tech?.name} · ${tech?.role}</span>
+          <span>${tech?.phone}</span>
         </div>
-        <div>
-          <p class="microcopy">Window</p>
-          <p>${appointment.sla}</p>
-        </div>
-        <div>
-          <p class="microcopy">ETA</p>
-          <p>${appointment.eta}</p>
+        <div class="flex flex-col text-xs text-blue-200">
+          <span><span class="font-semibold text-white">Window:</span> ${appointment.sla}</span>
+          <span><span class="font-semibold text-white">ETA:</span> ${appointment.eta}</span>
         </div>
       </div>
     </div>
 
-    <section class="detail-section">
-      <div class="section-header">
-        <h4>Checklist</h4>
-        <span class="pill">${progress}% complete</span>
+    <section class="mb-6">
+      <div class="flex items-center justify-between mb-2">
+        <h4 class="text-lg font-semibold text-blue-400">Checklist</h4>
+        <span class="bg-blue-500 text-white rounded-full px-3 py-1 text-xs font-semibold">${progress}% complete</span>
       </div>
-      <ul class="tasks">
+      <ul class="flex flex-col gap-2">
         ${appointment.tasks
           .map(
             (task) => `
-              <li class="task ${task.status}">
-                <div class="task-main">
-                  <span class="task-status">${iconForStatus(task.status)}</span>
-                  <span>${task.label}${task.required ? ' · Required' : ''}</span>
-                </div>
+              <li class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-700/80 ${task.status === 'done' ? 'line-through text-green-400' : task.status === 'in-progress' ? 'text-yellow-300' : 'text-blue-200'}">
+                <span class="text-lg">${iconForStatus(task.status)}</span>
+                <span>${task.label}${task.required ? ' · Required' : ''}</span>
               </li>
             `
           )
@@ -201,20 +325,20 @@ function renderDetail() {
       </ul>
     </section>
 
-    <section class="detail-section two-col">
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div>
-        <div class="section-header">
-          <h4>Materials & Parts</h4>
+        <div class="mb-2">
+          <h4 class="text-lg font-semibold text-blue-400">Materials & Parts</h4>
         </div>
-        <ul class="chips">
-          ${appointment.materials.map((mat) => `<li class="chip neutral">${mat.qty} × ${mat.item}</li>`).join('')}
+        <ul class="flex flex-wrap gap-2">
+          ${appointment.materials.map((mat) => `<li class="bg-slate-600 text-white rounded-full px-3 py-1 text-xs font-semibold">${mat.qty} × ${mat.item}</li>`).join('')}
         </ul>
       </div>
       <div>
-        <div class="section-header">
-          <h4>Customer Handoff</h4>
+        <div class="mb-2">
+          <h4 class="text-lg font-semibold text-blue-400">Customer Handoff</h4>
         </div>
-        <div class="handoff">
+        <div class="bg-slate-700/80 rounded-lg p-3 text-blue-200">
           <p><strong>Contact:</strong> ${appointment.customerHandoff.contact}</p>
           <p><strong>Signature:</strong> ${appointment.customerHandoff.signature}</p>
           <p><strong>Survey:</strong> ${appointment.customerHandoff.survey}</p>
@@ -222,18 +346,18 @@ function renderDetail() {
       </div>
     </section>
 
-    <section class="detail-section">
-      <div class="section-header">
-        <h4>Timeline</h4>
+    <section class="mb-6">
+      <div class="mb-2">
+        <h4 class="text-lg font-semibold text-blue-400">Timeline</h4>
       </div>
-      <ul class="timeline">
+      <ul class="flex flex-col gap-2">
         ${appointment.timeline
           .map(
             (entry) => `
-              <li>
-                <span class="time">${entry.time}</span>
-                <span class="dot ${entry.type}"></span>
-                <span>${entry.label}</span>
+              <li class="flex items-center gap-3">
+                <span class="text-xs text-blue-300">${entry.time}</span>
+                <span class="w-3 h-3 rounded-full ${entry.type === 'success' ? 'bg-green-400' : entry.type === 'warning' ? 'bg-yellow-400' : 'bg-blue-400'}"></span>
+                <span class="text-blue-200">${entry.label}</span>
               </li>
             `
           )
@@ -241,11 +365,11 @@ function renderDetail() {
       </ul>
     </section>
 
-    <section class="detail-section">
-      <div class="section-header">
-        <h4>Notes</h4>
+    <section>
+      <div class="mb-2">
+        <h4 class="text-lg font-semibold text-blue-400">Notes</h4>
       </div>
-      <ul class="notes">
+      <ul class="list-disc pl-6 text-blue-200">
         ${appointment.notes.map((note) => `<li>${note}</li>`).join('')}
       </ul>
     </section>
@@ -258,7 +382,9 @@ function iconForStatus(status) {
   return '○';
 }
 
+
 initFilters();
 renderSnapshot();
 renderList();
 renderDetail();
+renderLeaderboard();

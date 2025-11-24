@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Field Service Prototype</title>
   <link rel="stylesheet" href="styles.css" />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
-<body>
+<body class="bg-white">
+  <noscript>
+    <div style="background:#fee2e2;color:#991b1b;padding:16px;text-align:center;font-weight:bold;">
+      JavaScript is required for this app to work. Please enable JavaScript in your browser.
+    </div>
+  </noscript>
+
+  <div id="js-diagnostic" style="display:none;background:#fef9c3;color:#92400e;padding:12px;text-align:center;font-weight:bold;"></div>
+
   <!-- User Profile Modal -->
   <div id="profile-modal" class="modal" style="display:none;">
     <div class="modal-content">
@@ -22,12 +30,30 @@
           Email
           <input type="email" id="profile-email" required />
         </label>
-  <header class="flex flex-col md:flex-row items-center justify-between gap-6 px-8 py-6 bg-white border-b-2 border-blue-100 shadow-lg rounded-b-2xl mb-6">
-      <button id="profile-btn" title="View Profile" class="ml-4 bg-blue-500 hover:bg-blue-400 text-white font-semibold rounded-full px-5 py-2 shadow transition">👤 Profile</button>
+        <label>
+          Avatar URL (optional)
+          <input type="url" id="profile-avatar" placeholder="https://example.com/photo.jpg" />
+        </label>
+        <div class="profile-avatar-preview">
+          <img id="avatar-preview" src="" alt="Avatar preview" style="width:96px;height:96px;border-radius:9999px;border:2px solid var(--border);object-fit:cover;" />
+        </div>
+        <button type="submit">Save profile</button>
+      </form>
+    </div>
+  </div>
+
+  <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 px-8 py-6 bg-white border-b-2 border-blue-100 shadow-lg rounded-b-2xl mb-6">
+    <div>
+      <p class="eyebrow">Prototype · Mock Data</p>
+      <h1 class="text-3xl font-bold text-blue-900 mb-1">Field Service Operations</h1>
+      <p class="text-blue-800">Appointments, tasks, and on-site execution for technicians, engineers, and coordinators.</p>
+    </div>
+    <div class="profile-actions">
+      <button id="profile-btn" title="View Profile" class="bg-blue-500 hover:bg-blue-400 text-white font-semibold rounded-full px-5 py-2 shadow transition">👤 Profile</button>
     </div>
   </header>
 
-  <main class="layout">
+  <main class="layout px-6 md:px-8 pb-10">
     <div class="flex flex-wrap gap-4 mb-6">
       <label for="status-filter" class="flex flex-col text-xs text-blue-900 font-semibold">
         Status
@@ -51,6 +77,7 @@
         <input id="search-input" type="text" placeholder="WO#, customer, or site" class="rounded border border-blue-200 px-3 py-2" />
       </label>
     </div>
+
     <section class="panel leaderboard">
       <h2 class="text-xl font-bold text-blue-900 mb-2">Leaderboard</h2>
       <div id="leaderboard-list"></div>
@@ -59,10 +86,12 @@
         <div>Progress bar: progress toward next badge</div>
       </div>
     </section>
+
     <section class="panel summary">
       <h2 class="text-xl font-bold text-blue-900 mb-2">Live Snapshot</h2>
       <div id="snapshot-grid" class="grid"></div>
     </section>
+
     <section class="panel list">
       <div class="panel-header">
         <h2 class="text-xl font-bold text-blue-900">Appointment Board</h2>
@@ -70,6 +99,7 @@
       </div>
       <div id="appointment-list" class="list-body"></div>
     </section>
+
     <section class="panel detail">
       <div class="panel-header">
         <h2 class="text-xl font-bold text-blue-900">Work Order Detail</h2>
@@ -85,5 +115,13 @@
 
   <script type="module" src="mock-data.js"></script>
   <script type="module" src="app.js"></script>
+  <script>
+    const diag = document.getElementById('js-diagnostic');
+    if (diag) {
+      diag.style.display = 'block';
+      diag.textContent = 'JavaScript loaded and running.';
+    }
+    console.log('Diagnostic: JS loaded and running.');
+  </script>
 </body>
 </html>
