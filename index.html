@@ -5,40 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Field Service Prototype</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="tailwind-cdn.css" />
 </head>
 <body>
-  <header class="app-header">
-    <div>
-      <p class="eyebrow">Prototype · Mock Data</p>
-      <h1>Field Service Operations</h1>
-      <p class="subtitle">Appointments, tasks, and on-site execution for technicians, engineers, and coordinators.</p>
+  <!-- User Profile Modal -->
+  <div id="profile-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" id="close-profile-modal">&times;</span>
+      <h2>User Profile</h2>
+      <form id="profile-form">
+        <label>
+          Name
+          <input type="text" id="profile-name" required />
+        </label>
+        <label>
+          Email
+          <input type="email" id="profile-email" required />
+        </label>
+  <header class="flex flex-col md:flex-row items-center justify-between gap-6 px-8 py-6 bg-white border-b-2 border-blue-100 shadow-lg rounded-b-2xl mb-6">
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-8 pb-10">
+  <section class="col-span-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start mb-4 border border-blue-100">
+  <h2 class="text-xl font-bold text-blue-900 mb-2">Leaderboard</h2>
+        <div id="leaderboard-list"></div>
+  <div class="leaderboard-legend text-xs text-blue-800 mt-2 space-y-1">
+          <div>🏅 Badge = 1 completed job with customer feedback</div>
+          <div>Progress bar: progress toward next badge</div>
+        </div>
+      </section>
+  <section class="col-span-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start mb-4 border border-blue-100">
+  <h2 class="text-xl font-bold text-blue-900 mb-2">Live Snapshot</h2>
+        <div id="snapshot-grid" class="grid"></div>
+      </section>
+  <section class="col-span-2 bg-white rounded-2xl shadow-lg p-6 flex flex-col mb-4 border border-blue-100">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-bold text-blue-900">Appointment Board</h2>
+          <p class="text-xs text-blue-800">Demo data refreshes on load · Time windows shown in local time</p>
+        </div>
+        <div id="appointment-list" class="list-body"></div>
+      </section>
+  <section class="col-span-4 bg-white rounded-2xl shadow-lg p-6 flex flex-col mb-4 border border-blue-100">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-bold text-blue-900">Work Order Detail</h2>
+          <p class="text-xs text-blue-800">Guided view for field workers and coordinators</p>
+        </div>
+        <div id="detail"></div>
+      </section>
+    </main>
+      </div>
+      <button id="profile-btn" title="View Profile" class="ml-4 bg-blue-500 hover:bg-blue-400 text-white font-semibold rounded-full px-5 py-2 shadow transition">👤 Profile</button>
     </div>
-    <div class="filters">
-      <label>
-        Status
-        <select id="status-filter">
-          <option value="all">All</option>
-          <option value="Scheduled">Scheduled</option>
-          <option value="En Route">En Route</option>
-          <option value="On Site">On Site</option>
-          <option value="Completed">Completed</option>
-          <option value="Deferred">Deferred</option>
-        </select>
-      </label>
-      <label>
-        Technician
-        <select id="technician-filter">
-          <option value="all">All</option>
-        </select>
-      </label>
-      <label class="search-label">
-        <span>Search</span>
-        <input id="search-input" type="text" placeholder="WO-, customer, or site" />
-      </label>
+  </header>
     </div>
   </header>
 
   <main class="layout">
+    <section class="panel leaderboard">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard-list"></div>
+      <div class="leaderboard-legend">
+        <span>🏅 Badge = 1 completed job with customer feedback</span>
+        <span>Progress bar: progress toward next badge</span>
+      </div>
+    </section>
     <section class="panel summary">
       <h2>Live Snapshot</h2>
       <div id="snapshot-grid" class="grid"></div>
