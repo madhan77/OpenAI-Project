@@ -296,13 +296,28 @@ body {
 
 .layout {
   display: grid;
-  grid-template-columns: 320px 360px 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 18px;
   padding: 0 24px 32px;
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
   position: relative;
+}
+
+.controls {
+  grid-column: 1 / -1;
+  padding: 16px;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .span-2 {
+    grid-column: span 1;
+  }
 }
 
   .panel {

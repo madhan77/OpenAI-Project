@@ -52,33 +52,34 @@
   </header>
 
   <main class="layout px-6 md:px-8 pb-10">
-    <div id="gamification-bar" class="meta-strip"></div>
+    <section class="panel controls">
+      <div id="gamification-bar" class="meta-strip"></div>
+      <div class="filters">
+        <label for="status-filter">
+          Status
+          <select id="status-filter">
+            <option value="all">All</option>
+            <option value="On Site">On Site</option>
+            <option value="En Route">En Route</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+            <option value="Deferred">Deferred</option>
+          </select>
+        </label>
+        <label for="technician-filter">
+          Technician
+          <select id="technician-filter">
+            <option value="all">All</option>
+          </select>
+        </label>
+        <label for="search-input" class="search-label">
+          Search
+          <input id="search-input" type="text" placeholder="WO#, customer, or site" />
+        </label>
+      </div>
+    </section>
 
-    <div class="flex flex-wrap gap-4 mb-6">
-      <label for="status-filter" class="flex flex-col text-xs text-blue-900 font-semibold">
-        Status
-        <select id="status-filter" class="rounded border border-blue-200 px-3 py-2">
-          <option value="all">All</option>
-          <option value="On Site">On Site</option>
-          <option value="En Route">En Route</option>
-          <option value="Scheduled">Scheduled</option>
-          <option value="Completed">Completed</option>
-          <option value="Deferred">Deferred</option>
-        </select>
-      </label>
-      <label for="technician-filter" class="flex flex-col text-xs text-blue-900 font-semibold">
-        Technician
-        <select id="technician-filter" class="rounded border border-blue-200 px-3 py-2">
-          <option value="all">All</option>
-        </select>
-      </label>
-      <label for="search-input" class="flex flex-col text-xs text-blue-900 font-semibold">
-        Search
-        <input id="search-input" type="text" placeholder="WO#, customer, or site" class="rounded border border-blue-200 px-3 py-2" />
-      </label>
-    </div>
-
-    <section class="panel leaderboard">
+    <section class="panel leaderboard span-2">
       <h2 class="text-xl font-bold text-blue-900 mb-2">Leaderboard</h2>
       <div id="leaderboard-list"></div>
       <div class="leaderboard-legend text-xs text-blue-800 mt-2 space-y-1">
@@ -100,7 +101,7 @@
       <div id="appointment-list" class="list-body"></div>
     </section>
 
-    <section class="panel detail">
+    <section class="panel detail span-2">
       <div class="panel-header">
         <h2 class="text-xl font-bold text-blue-900">Work Order Detail</h2>
         <p class="text-xs text-blue-800">Guided view for field workers and coordinators</p>
