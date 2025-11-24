@@ -14,8 +14,6 @@
     </div>
   </noscript>
 
-  <div id="js-diagnostic" style="display:none;background:#fef9c3;color:#92400e;padding:12px;text-align:center;font-weight:bold;"></div>
-
   <!-- User Profile Modal -->
   <div id="profile-modal" class="modal" style="display:none;">
     <div class="modal-content">
@@ -54,6 +52,8 @@
   </header>
 
   <main class="layout px-6 md:px-8 pb-10">
+    <div id="gamification-bar" class="meta-strip"></div>
+
     <div class="flex flex-wrap gap-4 mb-6">
       <label for="status-filter" class="flex flex-col text-xs text-blue-900 font-semibold">
         Status
@@ -115,13 +115,5 @@
 
   <script type="module" src="mock-data.js"></script>
   <script type="module" src="app.js"></script>
-  <script>
-    const diag = document.getElementById('js-diagnostic');
-    if (diag) {
-      diag.style.display = 'block';
-      diag.textContent = 'JavaScript loaded and running.';
-    }
-    console.log('Diagnostic: JS loaded and running.');
-  </script>
 </body>
 </html>

@@ -154,6 +154,7 @@ const searchInput = document.getElementById('search-input');
 const listContainer = document.getElementById('appointment-list');
 const detailContainer = document.getElementById('detail');
 const snapshotContainer = document.getElementById('snapshot-grid');
+const gamificationBar = document.getElementById('gamification-bar');
 
 function initFilters() {
   technicians.forEach((tech) => {
@@ -192,6 +193,7 @@ function applyFilters() {
   renderList();
   renderSnapshot();
   renderDetail();
+  renderGamificationBar();
 }
 
 function renderSnapshot() {
@@ -224,6 +226,34 @@ function renderSnapshot() {
     .join('');
 }
 
+function renderGamificationBar() {
+  if (!gamificationBar) return;
+  const filteredCompleted = state.filtered.filter((appt) => appt.status === 'Completed').length;
+  const filteredActive = state.filtered.filter((appt) => appt.status === 'On Site' || appt.status === 'En Route').length;
+  const feedbackWins = state.filtered.filter((appt) => appt.customerHandoff?.survey === 'Completed').length;
+  const xp = filteredCompleted * 120 + filteredActive * 40 + state.filtered.length * 10;
+  const cards = [
+    { label: 'Squad XP', value: `${xp} XP`, detail: `${filteredCompleted} completed · ${filteredActive} active`, icon: '🎯' },
+    { label: 'Streak', value: `${Math.max(1, filteredCompleted)} days`, detail: 'Keep on-time arrivals to grow the streak', icon: '⚡' },
+    { label: 'Customer Kudos', value: `${feedbackWins} badges`, detail: 'Feedback wins unlocked', icon: '🏆' }
+  ];
+
+  gamificationBar.innerHTML = cards
+    .map(
+      (card) => `
+        <div class="meta-pill">
+          <div class="pill-icon">${card.icon}</div>
+          <div>
+            <p class="pill-label">${card.label}</p>
+            <p class="pill-value">${card.value}</p>
+            <p class="pill-detail">${card.detail}</p>
+          </div>
+        </div>
+      `
+    )
+    .join('');
+}
+
 function renderList() {
   const sorted = [...state.filtered].sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status));
 
@@ -232,34 +262,39 @@ function renderList() {
     .map((appt) => {
       const tech = technicians.find((t) => t.id === appt.technician);
       const isActive = appt.id === state.selectedId;
-      const cardClass = `card transition cursor-pointer bg-slate-800/80 rounded-xl p-5 mb-4 shadow ${
-        isActive ? 'active ring-4 ring-blue-400 shadow-lg' : 'hover:ring-2 hover:ring-blue-300'
-      }`;
+      const cardClass = `card appointment-card ${isActive ? 'active' : ''}`;
       const completedTasks = appt.tasks.filter((task) => task.status === 'done').length;
       const progress = Math.round((completedTasks / appt.tasks.length) * 100);
 
       return `
         <article class="${cardClass}" data-id="${appt.id}">
-          <div class="flex items-center justify-between mb-2">
+          <div class="card-top">
             <div>
-              <p class="uppercase text-xs text-blue-300 tracking-widest mb-1">${appt.id}</p>
-              <h3 class="text-lg font-bold text-white mb-1">${appt.title}</h3>
-              <p class="text-blue-200 text-sm">${appt.customer} · ${appt.site}</p>
+              <p class="eyebrow">${appt.id}</p>
+              <h3 class="card-title">${appt.title}</h3>
+              <p class="muted">${appt.customer} · ${appt.site}</p>
             </div>
-            <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusChipClass[appt.status] || 'bg-slate-600 text-white'}">${appt.status}</span>
+            <span class="${statusChipClass[appt.status] || 'chip'}">${appt.status}</span>
           </div>
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex flex-col gap-1 text-xs text-blue-200">
-              <span><span class="font-semibold text-white">Window:</span> ${appt.sla}</span>
-              <span><span class="font-semibold text-white">ETA:</span> ${appt.eta}</span>
-              <span><span class="font-semibold text-white">Technician:</span> ${tech?.name || 'Unassigned'}</span>
-            </div>
-            <div class="flex-1 flex flex-col items-end">
-              <div class="w-32 h-2 bg-slate-700 rounded-full overflow-hidden mb-1">
-                <div class="h-full bg-gradient-to-r from-blue-400 to-green-400 rounded-full" style="width:${progress}%"></div>
+          <div class="card-body">
+            <div class="meta meta-compact">
+              <div>
+                <p class="microcopy">Window</p>
+                <p>${appt.sla}</p>
               </div>
-              <span class="text-xs text-blue-300">${progress}% tasks</span>
+              <div>
+                <p class="microcopy">ETA</p>
+                <p>${appt.eta}</p>
+              </div>
+              <div>
+                <p class="microcopy">Technician</p>
+                <p>${tech?.name || 'Unassigned'}</p>
+              </div>
             </div>
+            <div class="meter">
+              <div class="meter-fill" style="width:${progress}%"></div>
+            </div>
+            <p class="microcopy">${progress}% tasks complete</p>
           </div>
         </article>
       `;
@@ -287,37 +322,57 @@ function renderDetail() {
   const progress = Math.round((completedTasks / appointment.tasks.length) * 100);
 
   detailContainer.innerHTML = `
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
+    <div class="detail-header">
       <div>
-        <p class="uppercase text-xs text-blue-300 tracking-widest mb-1">${appointment.id}</p>
-        <h3 class="text-2xl font-bold text-white mb-1">${appointment.title}</h3>
-        <p class="text-blue-200 text-base">${appointment.customer} · ${appointment.site}</p>
+        <p class="eyebrow">${appointment.id}</p>
+        <h3 class="detail-title">${appointment.title}</h3>
+        <p class="muted">${appointment.customer} · ${appointment.site}</p>
       </div>
-      <div class="flex flex-col md:flex-row md:items-center gap-4">
-        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusChipClass[appointment.status] || 'bg-slate-600 text-white'}">${appointment.status}</span>
-        <div class="flex flex-col text-xs text-blue-200">
-          <span><span class="font-semibold text-white">Technician:</span> ${tech?.name} · ${tech?.role}</span>
-          <span>${tech?.phone}</span>
-        </div>
-        <div class="flex flex-col text-xs text-blue-200">
-          <span><span class="font-semibold text-white">Window:</span> ${appointment.sla}</span>
-          <span><span class="font-semibold text-white">ETA:</span> ${appointment.eta}</span>
-        </div>
+      <div class="detail-badges">
+        <span class="${statusChipClass[appointment.status] || 'chip'}">${appointment.status}</span>
+        <div class="pill">Progress ${progress}%</div>
       </div>
     </div>
 
-    <section class="mb-6">
-      <div class="flex items-center justify-between mb-2">
-        <h4 class="text-lg font-semibold text-blue-400">Checklist</h4>
-        <span class="bg-blue-500 text-white rounded-full px-3 py-1 text-xs font-semibold">${progress}% complete</span>
+    <section class="detail-section">
+      <div class="section-header">
+        <h4>Assignment</h4>
       </div>
-      <ul class="flex flex-col gap-2">
+      <div class="assignment-grid">
+        <div>
+          <p class="microcopy">Technician</p>
+          <p>${tech?.name} · ${tech?.role}</p>
+          <p class="microcopy">${tech?.phone}</p>
+        </div>
+        <div>
+          <p class="microcopy">Window</p>
+          <p>${appointment.sla}</p>
+        </div>
+        <div>
+          <p class="microcopy">ETA</p>
+          <p>${appointment.eta}</p>
+        </div>
+        <div>
+          <p class="microcopy">Contact</p>
+          <p>${appointment.contact}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <div class="section-header">
+        <h4>Checklist</h4>
+        <span class="pill">+${completedTasks} / ${appointment.tasks.length} steps</span>
+      </div>
+      <ul class="tasks">
         ${appointment.tasks
           .map(
             (task) => `
-              <li class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-700/80 ${task.status === 'done' ? 'line-through text-green-400' : task.status === 'in-progress' ? 'text-yellow-300' : 'text-blue-200'}">
-                <span class="text-lg">${iconForStatus(task.status)}</span>
-                <span>${task.label}${task.required ? ' · Required' : ''}</span>
+              <li class="task ${task.status}">
+                <div class="task-main">
+                  <span class="task-status">${iconForStatus(task.status)}</span>
+                  <span>${task.label}${task.required ? ' · Required' : ''}</span>
+                </div>
               </li>
             `
           )
@@ -325,20 +380,20 @@ function renderDetail() {
       </ul>
     </section>
 
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <section class="detail-section two-col">
       <div>
-        <div class="mb-2">
-          <h4 class="text-lg font-semibold text-blue-400">Materials & Parts</h4>
+        <div class="section-header">
+          <h4>Materials & Parts</h4>
         </div>
-        <ul class="flex flex-wrap gap-2">
-          ${appointment.materials.map((mat) => `<li class="bg-slate-600 text-white rounded-full px-3 py-1 text-xs font-semibold">${mat.qty} × ${mat.item}</li>`).join('')}
+        <ul class="chips">
+          ${appointment.materials.map((mat) => `<li class="chip neutral">${mat.qty} × ${mat.item}</li>`).join('')}
         </ul>
       </div>
       <div>
-        <div class="mb-2">
-          <h4 class="text-lg font-semibold text-blue-400">Customer Handoff</h4>
+        <div class="section-header">
+          <h4>Customer Handoff</h4>
         </div>
-        <div class="bg-slate-700/80 rounded-lg p-3 text-blue-200">
+        <div class="handoff">
           <p><strong>Contact:</strong> ${appointment.customerHandoff.contact}</p>
           <p><strong>Signature:</strong> ${appointment.customerHandoff.signature}</p>
           <p><strong>Survey:</strong> ${appointment.customerHandoff.survey}</p>
@@ -346,18 +401,18 @@ function renderDetail() {
       </div>
     </section>
 
-    <section class="mb-6">
-      <div class="mb-2">
-        <h4 class="text-lg font-semibold text-blue-400">Timeline</h4>
+    <section class="detail-section">
+      <div class="section-header">
+        <h4>Timeline</h4>
       </div>
-      <ul class="flex flex-col gap-2">
+      <ul class="timeline">
         ${appointment.timeline
           .map(
             (entry) => `
-              <li class="flex items-center gap-3">
-                <span class="text-xs text-blue-300">${entry.time}</span>
-                <span class="w-3 h-3 rounded-full ${entry.type === 'success' ? 'bg-green-400' : entry.type === 'warning' ? 'bg-yellow-400' : 'bg-blue-400'}"></span>
-                <span class="text-blue-200">${entry.label}</span>
+              <li>
+                <span class="time">${entry.time}</span>
+                <span class="dot ${entry.type}"></span>
+                <span>${entry.label}</span>
               </li>
             `
           )
@@ -365,11 +420,11 @@ function renderDetail() {
       </ul>
     </section>
 
-    <section>
-      <div class="mb-2">
-        <h4 class="text-lg font-semibold text-blue-400">Notes</h4>
+    <section class="detail-section">
+      <div class="section-header">
+        <h4>Notes</h4>
       </div>
-      <ul class="list-disc pl-6 text-blue-200">
+      <ul class="notes">
         ${appointment.notes.map((note) => `<li>${note}</li>`).join('')}
       </ul>
     </section>
@@ -388,3 +443,4 @@ renderSnapshot();
 renderList();
 renderDetail();
 renderLeaderboard();
+renderGamificationBar();
