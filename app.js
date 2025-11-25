@@ -439,8 +439,6 @@ function iconForStatus(status) {
 
 
 initFilters();
-renderSnapshot();
-renderList();
-renderDetail();
+applyFilters();
 renderLeaderboard();
 renderGamificationBar();

@@ -166,7 +166,7 @@
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: radial-gradient(circle at 18% 20%, #1a2550 0, #0e1633 40%, #0b1124 100%);
+  background: radial-gradient(circle at 18% 20%, #1a2550 0, #0e1633 32%, #0b1124 70%, #0a1022 100%);
   color: var(--text);
   min-height: 100vh;
 }
@@ -302,9 +302,9 @@ body {
     "list detail detail";
   grid-template-columns: 1.1fr 1fr 1.15fr;
   gap: 18px;
-  padding: 0 24px 32px;
-  width: 100%;
-  max-width: 1400px;
+  padding: 0 16px 32px;
+  width: 98vw;
+  max-width: 1750px;
   margin: 0 auto;
   position: relative;
 }
