@@ -1,4 +1,4 @@
-export const technicians = [
+const baseTechnicians = [
   {
     id: 't1',
     name: 'Avery Chen',
@@ -25,7 +25,7 @@ export const technicians = [
   }
 ];
 
-export const appointments = [
+const baseAppointments = [
   {
     id: 'WO-1042',
     title: 'Quarterly HVAC tune-up',
@@ -167,3 +167,54 @@ export const appointments = [
     }
   }
 ];
+
+function expandTechnicians(count = 50) {
+  const techs = [];
+  const roles = ['Field Engineer', 'Technician', 'Consultant', 'Senior Tech', 'Coordinator'];
+  const regions = ['Bay Area', 'South Bay', 'Peninsula', 'North Bay', 'Central Valley', 'Sacramento'];
+  for (let i = 0; i < count; i++) {
+    const template = baseTechnicians[i % baseTechnicians.length];
+    techs.push({
+      ...template,
+      id: `t${i + 1}`,
+      name: `${template.name.split(' ')[0]} ${String.fromCharCode(65 + (i % 26))}${i}`,
+      region: regions[i % regions.length],
+      role: roles[i % roles.length],
+      phone: `+1 (555) 01${(i % 90 + 10).toString().padStart(2, '0')}-${(1000 + i).toString().slice(-4)}`
+    });
+  }
+  return techs;
+}
+
+function expandAppointments(count = 2000, technicians) {
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    const template = baseAppointments[i % baseAppointments.length];
+    const tech = technicians[i % technicians.length];
+    const day = (i % 28) + 1;
+    const id = `WO-${2000 + i}`;
+    result.push({
+      ...template,
+      id,
+      title: `${template.title} #${i + 1}`,
+      technician: tech.id,
+      status: ['On Site', 'En Route', 'Scheduled', 'Completed', 'Deferred'][i % 5],
+      customer: `${template.customer} ${String.fromCharCode(65 + (i % 26))}`,
+      site: `${template.site} Bay ${i % 7}`,
+      start: `2025-11-${String(day).padStart(2, '0')}T10:00:00`,
+      eta: template.eta,
+      tasks: template.tasks.map((task, idx) => ({
+        ...task,
+        status: ['done', 'in-progress', 'pending'][((i + idx) % 3)]
+      })),
+      materials: template.materials,
+      timeline: template.timeline,
+      notes: template.notes,
+      customerHandoff: template.customerHandoff
+    });
+  }
+  return result;
+}
+
+export const technicians = expandTechnicians(60);
+export const appointments = expandAppointments(2000, technicians);

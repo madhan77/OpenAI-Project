@@ -3,13 +3,13 @@ import { appointments, technicians } from './mock-data.js';
 // --- Leaderboard Logic ---
 const leaderboardContainer = document.getElementById('leaderboard-list');
 
-function calculateLeaderboard() {
+function calculateLeaderboard(sourceAppts = appointments) {
   // Points: Only for completed jobs with customer feedback (survey === 'Completed')
   // Badge: Awarded for each completed job with feedback
   const pointsPerJob = 100;
   const badgeEmoji = '🏅';
   const leaderboard = technicians.map((tech) => {
-    const jobs = appointments.filter(
+    const jobs = sourceAppts.filter(
       (appt) =>
         appt.technician === tech.id &&
         appt.status === 'Completed' &&
@@ -19,7 +19,7 @@ function calculateLeaderboard() {
     const points = jobs.length * pointsPerJob;
     const badges = badgeEmoji.repeat(jobs.length);
     // Progress toward next badge (show as percent)
-    const allJobs = appointments.filter((appt) => appt.technician === tech.id);
+    const allJobs = sourceAppts.filter((appt) => appt.technician === tech.id);
     const completedWithFeedback = jobs.length;
     const totalCompleted = allJobs.filter((appt) => appt.status === 'Completed').length;
     // Progress: completed jobs with feedback / total completed jobs (if any), else 0
@@ -42,7 +42,7 @@ function calculateLeaderboard() {
 }
 
 function renderLeaderboard() {
-  const leaderboard = calculateLeaderboard();
+  const leaderboard = calculateLeaderboard(state.filtered || appointments);
   leaderboardContainer.innerHTML = leaderboard
     .map(
       (user, idx) => `
