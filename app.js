@@ -155,6 +155,11 @@ const listContainer = document.getElementById('appointment-list');
 const detailContainer = document.getElementById('detail');
 const snapshotContainer = document.getElementById('snapshot-grid');
 const gamificationBar = document.getElementById('gamification-bar');
+const slaIndicatorText = {
+  ok: 'On track',
+  risk: 'At risk',
+  breach: 'Breached'
+};
 
 function initFilters() {
   technicians.forEach((tech) => {
@@ -211,7 +216,8 @@ function renderSnapshot() {
     { label: 'In Progress', value: (counts['On Site'] || 0) + (counts['En Route'] || 0) },
     { label: 'Scheduled Today', value: counts['Scheduled'] || 0 },
     { label: 'Completed', value: counts['Completed'] || 0 },
-    { label: 'Team Utilization', value: `${utilization || 0}%` }
+    { label: 'Team Utilization', value: `${utilization || 0}%` },
+    { label: 'SLA Breaches', value: state.filtered.filter((appt) => appt.slaBreached).length || 0 }
   ];
 
   snapshotContainer.innerHTML = cards
@@ -265,6 +271,7 @@ function renderList() {
       const cardClass = `card appointment-card ${isActive ? 'active' : ''}`;
       const completedTasks = appt.tasks.filter((task) => task.status === 'done').length;
       const progress = Math.round((completedTasks / appt.tasks.length) * 100);
+      const slaChip = appt.slaBreached ? '<span class="chip warning">SLA breach</span>' : '';
 
       return `
         <article class="${cardClass}" data-id="${appt.id}">
@@ -274,7 +281,10 @@ function renderList() {
               <h3 class="card-title">${appt.title}</h3>
               <p class="muted">${appt.customer} · ${appt.site}</p>
             </div>
-            <span class="${statusChipClass[appt.status] || 'chip'}">${appt.status}</span>
+            <div class="flex gap-2">
+              ${slaChip}
+              <span class="${statusChipClass[appt.status] || 'chip'}">${appt.status}</span>
+            </div>
           </div>
           <div class="card-body">
             <div class="meta meta-compact">
@@ -284,11 +294,12 @@ function renderList() {
               </div>
               <div>
                 <p class="microcopy">ETA</p>
-                <p>${appt.eta}</p>
+                <p>${appt.routingEta || appt.eta}</p>
               </div>
               <div>
                 <p class="microcopy">Technician</p>
                 <p>${tech?.name || 'Unassigned'}</p>
+                <p class="microcopy">${appt.routingEta || ''}</p>
               </div>
             </div>
             <div class="meter">
@@ -320,6 +331,8 @@ function renderDetail() {
   const tech = technicians.find((t) => t.id === appointment.technician);
   const completedTasks = appointment.tasks.filter((task) => task.status === 'done').length;
   const progress = Math.round((completedTasks / appointment.tasks.length) * 100);
+  const compliancePass = appointment.complianceChecks?.filter((c) => c.status === 'pass').length || 0;
+  const complianceTotal = appointment.complianceChecks?.length || 0;
 
   detailContainer.innerHTML = `
     <div class="detail-header">
@@ -331,6 +344,7 @@ function renderDetail() {
       <div class="detail-badges">
         <span class="${statusChipClass[appointment.status] || 'chip'}">${appointment.status}</span>
         <div class="pill">Progress ${progress}%</div>
+        <div class="pill ${appointment.slaBreached ? 'pill-risk' : ''}">SLA ${appointment.slaBreached ? 'Breached' : 'On Track'}</div>
       </div>
     </div>
 
@@ -350,11 +364,15 @@ function renderDetail() {
         </div>
         <div>
           <p class="microcopy">ETA</p>
-          <p>${appointment.eta}</p>
+          <p>${appointment.routingEta || appointment.eta}</p>
         </div>
         <div>
           <p class="microcopy">Contact</p>
           <p>${appointment.contact}</p>
+        </div>
+        <div>
+          <p class="microcopy">SLA Status</p>
+          <p>${appointment.slaBreached ? 'Breached' : 'On track'}</p>
         </div>
       </div>
     </section>
@@ -399,6 +417,56 @@ function renderDetail() {
           <p><strong>Survey:</strong> ${appointment.customerHandoff.survey}</p>
         </div>
       </div>
+    </section>
+
+    <section class="detail-section">
+      <div class="section-header">
+        <h4>Compliance Checks</h4>
+        <span class="pill">${compliancePass}/${complianceTotal} passed</span>
+      </div>
+      <ul class="checks">
+        ${(appointment.complianceChecks || [])
+          .map(
+            (check) => `
+              <li class="check ${check.status}">
+                <span class="check-dot"></span>
+                <span>${check.label}</span>
+              </li>
+            `
+          )
+          .join('')}
+      </ul>
+    </section>
+
+    <section class="detail-section">
+      <div class="section-header">
+        <h4>Parts Inventory</h4>
+      </div>
+      <div class="inventory">
+        <div class="inventory-row inventory-head">
+          <span>Item</span><span>On Hand</span><span>Reserved</span>
+        </div>
+        ${(appointment.partsInventory || [])
+          .map(
+            (item) => `
+              <div class="inventory-row">
+                <span>${item.item}</span>
+                <span>${item.onHand}</span>
+                <span>${item.reserved}</span>
+              </div>
+            `
+          )
+          .join('')}
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <div class="section-header">
+        <h4>Coordinator Notes</h4>
+      </div>
+      <ul class="notes">
+        ${(appointment.coordinatorNotes || []).map((note) => `<li>${note}</li>`).join('')}
+      </ul>
     </section>
 
     <section class="detail-section">
