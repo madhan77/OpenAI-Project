@@ -451,6 +451,14 @@ body {
   gap: 6px;
 }
 
+.muted.small {
+  font-size: 13px;
+}
+
+.muted.smaller {
+  font-size: 12px;
+}
+
 .meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

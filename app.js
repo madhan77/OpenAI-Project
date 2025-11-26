@@ -17,7 +17,7 @@ function calculateLeaderboard(sourceAppts = appointments) {
         appt.customerHandoff.survey === 'Completed'
     );
     const points = jobs.length * pointsPerJob;
-    const badges = badgeEmoji.repeat(jobs.length);
+    const badges = jobs.length; // count instead of long string to avoid overflow
     // Progress toward next badge (show as percent)
     const allJobs = sourceAppts.filter((appt) => appt.technician === tech.id);
     const completedWithFeedback = jobs.length;
@@ -50,7 +50,7 @@ function renderLeaderboard() {
           <span class="rank">${idx + 1}</span>
           <span class="name">${user.name} <span class="region">(${user.region})</span></span>
           <span class="points">${user.points} pts</span>
-          <span class="badges">${user.badges.length > 30 ? user.badges.slice(0, 30) + ' +' + (user.badges.length - 30) : user.badges}</span>
+          <span class="badges" title="${user.badges} completed with feedback">🏅 × ${user.badges}</span>
         </div>
         <div class="leaderboard-progress">
           <div class="progress-bar-bg">
@@ -279,7 +279,7 @@ function renderList() {
             <div>
               <p class="eyebrow">${appt.id}</p>
               <h3 class="card-title">${appt.title}</h3>
-              <p class="muted">${appt.customer} · ${appt.site}</p>
+              <p class="muted small">${appt.customer} · ${appt.site}</p>
             </div>
             <div class="chip-stack">
               ${slaChip}
@@ -287,20 +287,7 @@ function renderList() {
             </div>
           </div>
           <div class="card-body compact">
-            <div class="meta meta-compact small">
-              <div>
-                <p class="microcopy">Window</p>
-                <p>${appt.sla}</p>
-              </div>
-              <div>
-                <p class="microcopy">ETA</p>
-                <p>${appt.routingEta || appt.eta}</p>
-              </div>
-              <div>
-                <p class="microcopy">Technician</p>
-                <p>${tech?.name || 'Unassigned'}</p>
-              </div>
-            </div>
+            <p class="muted smaller">${appt.routingEta || appt.eta} · ${tech?.name || 'Unassigned'}</p>
             <div class="meter small">
               <div class="meter-fill" style="width:${progress}%"></div>
             </div>
