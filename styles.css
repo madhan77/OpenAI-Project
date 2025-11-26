@@ -433,6 +433,13 @@ body {
   color: var(--text);
 }
 
+.chip-stack {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .card-body {
   margin-top: 10px;
   display: flex;
@@ -440,10 +447,18 @@ body {
   gap: 10px;
 }
 
+.card-body.compact {
+  gap: 6px;
+}
+
 .meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+.meta-compact.small {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
 
 .meta-compact p {
@@ -466,6 +481,10 @@ body {
   overflow: hidden;
   border: 1px solid var(--border);
   position: relative;
+}
+
+.meter.small {
+  height: 6px;
 }
 
 .meter-fill {

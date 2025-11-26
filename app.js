@@ -50,7 +50,7 @@ function renderLeaderboard() {
           <span class="rank">${idx + 1}</span>
           <span class="name">${user.name} <span class="region">(${user.region})</span></span>
           <span class="points">${user.points} pts</span>
-          <span class="badges">${user.badges}</span>
+          <span class="badges">${user.badges.length > 30 ? user.badges.slice(0, 30) + ' +' + (user.badges.length - 30) : user.badges}</span>
         </div>
         <div class="leaderboard-progress">
           <div class="progress-bar-bg">
@@ -281,13 +281,13 @@ function renderList() {
               <h3 class="card-title">${appt.title}</h3>
               <p class="muted">${appt.customer} · ${appt.site}</p>
             </div>
-            <div class="flex gap-2">
+            <div class="chip-stack">
               ${slaChip}
               <span class="${statusChipClass[appt.status] || 'chip'}">${appt.status}</span>
             </div>
           </div>
-          <div class="card-body">
-            <div class="meta meta-compact">
+          <div class="card-body compact">
+            <div class="meta meta-compact small">
               <div>
                 <p class="microcopy">Window</p>
                 <p>${appt.sla}</p>
@@ -299,10 +299,9 @@ function renderList() {
               <div>
                 <p class="microcopy">Technician</p>
                 <p>${tech?.name || 'Unassigned'}</p>
-                <p class="microcopy">${appt.routingEta || ''}</p>
               </div>
             </div>
-            <div class="meter">
+            <div class="meter small">
               <div class="meter-fill" style="width:${progress}%"></div>
             </div>
             <p class="microcopy">${progress}% tasks complete</p>
