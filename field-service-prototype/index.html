@@ -5,57 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Field Service Prototype</title>
   <link rel="stylesheet" href="styles.css" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
-<body>
-  <header class="app-header">
+<body class="bg-white">
+  <noscript>
+    <div style="background:#fee2e2;color:#991b1b;padding:16px;text-align:center;font-weight:bold;">
+      JavaScript is required for this app to work. Please enable JavaScript in your browser.
+    </div>
+  </noscript>
+
+  <!-- User Profile Modal -->
+  <div id="profile-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" id="close-profile-modal">&times;</span>
+      <h2>User Profile</h2>
+      <form id="profile-form">
+        <label>
+          Name
+          <input type="text" id="profile-name" required />
+        </label>
+        <label>
+          Email
+          <input type="email" id="profile-email" required />
+        </label>
+        <label>
+          Avatar URL (optional)
+          <input type="url" id="profile-avatar" placeholder="https://example.com/photo.jpg" />
+        </label>
+        <div class="profile-avatar-preview">
+          <img id="avatar-preview" src="" alt="Avatar preview" style="width:96px;height:96px;border-radius:9999px;border:2px solid var(--border);object-fit:cover;" />
+        </div>
+        <button type="submit">Save profile</button>
+      </form>
+    </div>
+  </div>
+
+  <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 px-8 py-6 bg-white border-b-2 border-blue-100 shadow-lg rounded-b-2xl mb-6">
     <div>
       <p class="eyebrow">Prototype · Mock Data</p>
-      <h1>Field Service Operations</h1>
-      <p class="subtitle">Appointments, tasks, and on-site execution for technicians, engineers, and coordinators.</p>
+      <h1 class="text-3xl font-bold text-blue-900 mb-1">Field Service Operations</h1>
+      <p class="text-blue-800">Appointments, tasks, and on-site execution for technicians, engineers, and coordinators.</p>
     </div>
-    <div class="filters">
-      <label>
-        Status
-        <select id="status-filter">
-          <option value="all">All</option>
-          <option value="Scheduled">Scheduled</option>
-          <option value="En Route">En Route</option>
-          <option value="On Site">On Site</option>
-          <option value="Completed">Completed</option>
-          <option value="Deferred">Deferred</option>
-        </select>
-      </label>
-      <label>
-        Technician
-        <select id="technician-filter">
-          <option value="all">All</option>
-        </select>
-      </label>
-      <label class="search-label">
-        <span>Search</span>
-        <input id="search-input" type="text" placeholder="WO-, customer, or site" />
-      </label>
+    <div class="profile-actions">
+      <button id="profile-btn" title="View Profile" class="bg-blue-500 hover:bg-blue-400 text-white font-semibold rounded-full px-5 py-2 shadow transition">👤 Profile</button>
     </div>
   </header>
 
-  <main class="layout">
+  <main class="layout px-6 md:px-8 pb-10">
+    <section class="panel controls">
+      <div id="gamification-bar" class="meta-strip"></div>
+      <div class="filters">
+        <label for="status-filter">
+          Status
+          <select id="status-filter">
+            <option value="all">All</option>
+            <option value="On Site">On Site</option>
+            <option value="En Route">En Route</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+            <option value="Deferred">Deferred</option>
+          </select>
+        </label>
+        <label for="technician-filter">
+          Technician
+          <select id="technician-filter">
+            <option value="all">All</option>
+          </select>
+        </label>
+        <label for="search-input" class="search-label">
+          Search
+          <input id="search-input" type="text" placeholder="WO#, customer, or site" />
+        </label>
+      </div>
+    </section>
+
+    <section class="panel leaderboard span-2">
+      <h2 class="text-xl font-bold text-blue-900 mb-2">Leaderboard</h2>
+      <div id="leaderboard-list"></div>
+      <div class="leaderboard-legend text-xs text-blue-800 mt-2 space-y-1">
+        <div>🏅 Badge = 1 completed job with customer feedback</div>
+        <div>Progress bar: progress toward next badge</div>
+      </div>
+    </section>
+
     <section class="panel summary">
-      <h2>Live Snapshot</h2>
+      <h2 class="text-xl font-bold text-blue-900 mb-2">Live Snapshot</h2>
       <div id="snapshot-grid" class="grid"></div>
     </section>
 
     <section class="panel list">
       <div class="panel-header">
-        <h2>Appointment Board</h2>
-        <p class="microcopy">Demo data refreshes on load · Time windows shown in local time</p>
+        <h2 class="text-xl font-bold text-blue-900">Appointment Board</h2>
+        <p class="text-xs text-blue-800">Demo data refreshes on load · Time windows shown in local time</p>
       </div>
       <div id="appointment-list" class="list-body"></div>
     </section>
 
-    <section class="panel detail">
+    <section class="panel detail span-2">
       <div class="panel-header">
-        <h2>Work Order Detail</h2>
-        <p class="microcopy">Guided view for field workers and coordinators</p>
+        <h2 class="text-xl font-bold text-blue-900">Work Order Detail</h2>
+        <p class="text-xs text-blue-800">Guided view for field workers and coordinators</p>
       </div>
       <div id="detail"></div>
     </section>

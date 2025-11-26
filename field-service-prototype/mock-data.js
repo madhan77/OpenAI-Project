@@ -1,4 +1,4 @@
-export const technicians = [
+const baseTechnicians = [
   {
     id: 't1',
     name: 'Avery Chen',
@@ -25,7 +25,7 @@ export const technicians = [
   }
 ];
 
-export const appointments = [
+const baseAppointments = [
   {
     id: 'WO-1042',
     title: 'Quarterly HVAC tune-up',
@@ -64,7 +64,20 @@ export const appointments = [
       contact: 'Maria Lopez',
       signature: 'Pending',
       survey: 'Not sent'
-    }
+    },
+    routingEta: '10:15 · light traffic',
+    slaBreached: false,
+    complianceChecks: [
+      { label: 'PPE and lockout-tagout', status: 'pass' },
+      { label: 'HVAC safety checklist', status: 'pass' },
+      { label: 'Site permit check', status: 'pending' }
+    ],
+    coordinatorNotes: ['Confirm spare filters stocked in van.', 'Share coil photos with OEM if fouling persists.'],
+    partsInventory: [
+      { item: 'MERV-13 filters', onHand: 6, reserved: 4 },
+      { item: 'Drive belt A42', onHand: 3, reserved: 2 },
+      { item: 'Cleaning solvent', onHand: 2, reserved: 1 }
+    ]
   },
   {
     id: 'WO-1043',
@@ -97,7 +110,19 @@ export const appointments = [
       contact: 'Andre Watts',
       signature: 'Not started',
       survey: 'Scheduled at completion'
-    }
+    },
+    routingEta: '12:50 · pending dispatch',
+    slaBreached: false,
+    complianceChecks: [
+      { label: 'Low-voltage permit', status: 'pending' },
+      { label: 'Hot work not required', status: 'pass' }
+    ],
+    coordinatorNotes: ['Align outage window with store lead before powering down.', 'Capture rack photos before/after.'],
+    partsInventory: [
+      { item: 'Cat6 patch cables', onHand: 24, reserved: 12 },
+      { item: '24-port PoE switch', onHand: 2, reserved: 1 },
+      { item: 'Cable labels', onHand: 50, reserved: 10 }
+    ]
   },
   {
     id: 'WO-1044',
@@ -129,7 +154,19 @@ export const appointments = [
       contact: 'Gwen Lee',
       signature: 'Pending',
       survey: 'Queued'
-    }
+    },
+    routingEta: '09:40 · en route',
+    slaBreached: false,
+    complianceChecks: [
+      { label: 'ID badge / access list', status: 'pass' },
+      { label: 'EHS briefing signed', status: 'pending' },
+      { label: 'Safety gear verified', status: 'pass' }
+    ],
+    coordinatorNotes: ['Prep audit report template for signature.', 'Check gate access list before arrival.'],
+    partsInventory: [
+      { item: 'Digital inspection checklist', onHand: 5, reserved: 1 },
+      { item: 'PPE kit', onHand: 3, reserved: 1 }
+    ]
   },
   {
     id: 'WO-1045',
@@ -164,6 +201,82 @@ export const appointments = [
       contact: 'Ethan Brooks',
       signature: 'Captured',
       survey: 'Completed'
-    }
+    },
+    routingEta: 'Completed · log closed',
+    slaBreached: false,
+    complianceChecks: [
+      { label: 'UPS self-test record', status: 'pass' },
+      { label: 'Arc-flash PPE verified', status: 'pass' },
+      { label: 'Permit to work', status: 'pass' }
+    ],
+    coordinatorNotes: ['Archive thermal scan images in ticket.', 'Send firmware follow-up email.'],
+    partsInventory: [
+      { item: 'Thermal camera', onHand: 2, reserved: 1 },
+      { item: 'UPS firmware 4.3', onHand: 5, reserved: 1 }
+    ]
   }
 ];
+
+function expandTechnicians(count = 50) {
+  const techs = [];
+  const roles = ['Field Engineer', 'Technician', 'Consultant', 'Senior Tech', 'Coordinator'];
+  const regions = ['Bay Area', 'South Bay', 'Peninsula', 'North Bay', 'Central Valley', 'Sacramento'];
+  for (let i = 0; i < count; i++) {
+    const template = baseTechnicians[i % baseTechnicians.length];
+    techs.push({
+      ...template,
+      id: `t${i + 1}`,
+      name: `${template.name.split(' ')[0]} ${String.fromCharCode(65 + (i % 26))}${i}`,
+      region: regions[i % regions.length],
+      role: roles[i % roles.length],
+      phone: `+1 (555) 01${(i % 90 + 10).toString().padStart(2, '0')}-${(1000 + i).toString().slice(-4)}`
+    });
+  }
+  return techs;
+}
+
+function expandAppointments(count = 2000, technicians) {
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    const template = baseAppointments[i % baseAppointments.length];
+    const tech = technicians[i % technicians.length];
+    const day = (i % 28) + 1;
+    const id = `WO-${2000 + i}`;
+    const slaBreached = (i % 7 === 0) && (i % 5 !== 3);
+    result.push({
+      ...template,
+      id,
+      title: `${template.title} #${i + 1}`,
+      technician: tech.id,
+      status: ['On Site', 'En Route', 'Scheduled', 'Completed', 'Deferred'][i % 5],
+      customer: `${template.customer} ${String.fromCharCode(65 + (i % 26))}`,
+      site: `${template.site} Bay ${i % 7}`,
+      start: `2025-11-${String(day).padStart(2, '0')}T10:00:00`,
+      eta: template.eta,
+      routingEta: template.routingEta,
+      slaBreached,
+      tasks: template.tasks.map((task, idx) => ({
+        ...task,
+        status: ['done', 'in-progress', 'pending'][((i + idx) % 3)]
+      })),
+      materials: template.materials,
+      timeline: template.timeline,
+      notes: template.notes,
+      customerHandoff: template.customerHandoff,
+      complianceChecks: template.complianceChecks.map((check, idx) => ({
+        ...check,
+        status: ['pass', 'pending', 'fail'][(i + idx) % 3]
+      })),
+      coordinatorNotes: template.coordinatorNotes,
+      partsInventory: template.partsInventory.map((item, idx) => ({
+        ...item,
+        onHand: item.onHand + ((i + idx) % 3),
+        reserved: item.reserved + ((i + idx) % 2)
+      }))
+    });
+  }
+  return result;
+}
+
+export const technicians = expandTechnicians(60);
+export const appointments = expandAppointments(2000, technicians);
