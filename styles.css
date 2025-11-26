@@ -56,9 +56,13 @@
   text-align: right;
 }
 .leaderboard-row .badges {
-  font-size: 22px;
-  min-width: 60px;
+  font-size: 16px;
+  min-width: 90px;
+  max-width: 140px;
   text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 /* Profile Button and Modal */
 .profile-actions {
@@ -409,6 +413,7 @@ body {
 
 .appointment-card {
   background: #ffffff;
+  min-height: 88px;
 }
 
 .card:hover {
