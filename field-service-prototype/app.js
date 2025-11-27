@@ -4,29 +4,16 @@ import { appointments, technicians } from './mock-data.js';
 const leaderboardContainer = document.getElementById('leaderboard-list');
 
 function calculateLeaderboard(sourceAppts = appointments) {
-  // Points: Only for completed jobs with customer feedback (survey === 'Completed')
-  // Badge: Awarded for each completed job with feedback
-  const pointsPerJob = 100;
-  const badgeEmoji = '🏅';
+  // Points: completed + active give scoring; badges scaled off completed
+  const pointsPerCompleted = 100;
+  const pointsPerActive = 40;
   const leaderboard = technicians.map((tech) => {
-    const jobs = sourceAppts.filter(
-      (appt) =>
-        appt.technician === tech.id &&
-        appt.status === 'Completed' &&
-        appt.customerHandoff &&
-        appt.customerHandoff.survey === 'Completed'
-    );
-    const points = jobs.length * pointsPerJob;
-    const badges = jobs.length; // count instead of long string to avoid overflow
-    // Progress toward next badge (show as percent)
-    const allJobs = sourceAppts.filter((appt) => appt.technician === tech.id);
-    const completedWithFeedback = jobs.length;
-    const totalCompleted = allJobs.filter((appt) => appt.status === 'Completed').length;
-    // Progress: completed jobs with feedback / total completed jobs (if any), else 0
-    let progress = 0;
-    if (totalCompleted > 0) {
-      progress = Math.round((completedWithFeedback / totalCompleted) * 100);
-    }
+    const techAppts = sourceAppts.filter((appt) => appt.technician === tech.id);
+    const completed = techAppts.filter((appt) => appt.status === 'Completed');
+    const active = techAppts.filter((appt) => appt.status === 'On Site' || appt.status === 'En Route');
+    const points = completed.length * pointsPerCompleted + active.length * pointsPerActive;
+    const badges = Math.max(1, Math.floor(completed.length / 2));
+    const progress = Math.min(100, Math.round(((completed.length % 2) / 2) * 100));
     return {
       id: tech.id,
       name: tech.name,
@@ -38,11 +25,11 @@ function calculateLeaderboard(sourceAppts = appointments) {
   });
   // Sort by points descending
   leaderboard.sort((a, b) => b.points - a.points);
-  return leaderboard;
+  return leaderboard.slice(0, 10);
 }
 
 function renderLeaderboard() {
-  const leaderboard = calculateLeaderboard(state.filtered || appointments).slice(0, 10);
+  const leaderboard = calculateLeaderboard(state.filtered || appointments);
   leaderboardContainer.innerHTML = leaderboard
     .map(
       (user, idx) => `

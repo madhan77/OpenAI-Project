@@ -243,6 +243,7 @@ function expandAppointments(count = 2000, technicians) {
     const day = (i % 28) + 1;
     const id = `WO-${2000 + i}`;
     const slaBreached = (i % 7 === 0) && (i % 5 !== 3);
+    const surveyStatus = ['Completed', 'Pending', 'Not sent', 'Queued'][(i + 2) % 4];
     result.push({
       ...template,
       id,
@@ -262,7 +263,10 @@ function expandAppointments(count = 2000, technicians) {
       materials: template.materials,
       timeline: template.timeline,
       notes: template.notes,
-      customerHandoff: template.customerHandoff,
+      customerHandoff: {
+        ...template.customerHandoff,
+        survey: surveyStatus
+      },
       complianceChecks: template.complianceChecks.map((check, idx) => ({
         ...check,
         status: ['pass', 'pending', 'fail'][(i + idx) % 3]
