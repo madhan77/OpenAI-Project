@@ -42,7 +42,7 @@ function calculateLeaderboard(sourceAppts = appointments) {
 }
 
 function renderLeaderboard() {
-  const leaderboard = calculateLeaderboard(state.filtered || appointments);
+  const leaderboard = calculateLeaderboard(state.filtered || appointments).slice(0, 10);
   leaderboardContainer.innerHTML = leaderboard
     .map(
       (user, idx) => `
@@ -276,10 +276,8 @@ function renderList() {
       return `
         <article class="${cardClass}" data-id="${appt.id}">
           <div class="card-top">
-            <div>
+            <div class="id-line">
               <p class="eyebrow">${appt.id}</p>
-              <h3 class="card-title">${appt.title}</h3>
-              <p class="muted small">${appt.customer} · ${appt.site}</p>
             </div>
             <div class="chip-stack">
               ${slaChip}
@@ -287,6 +285,8 @@ function renderList() {
             </div>
           </div>
           <div class="card-body compact">
+            <h3 class="card-title">${appt.title}</h3>
+            <p class="muted small">${appt.customer} · ${appt.site}</p>
             <p class="muted smaller">${appt.routingEta || appt.eta} · ${tech?.name || 'Unassigned'}</p>
             <div class="meter small">
               <div class="meter-fill" style="width:${progress}%"></div>
