@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unified Commerce Portal</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="brand">
+        <span class="logo">UCP</span>
+        <div>
+          <p class="brand-label">Unified Commerce Portal</p>
+          <p class="brand-subtext">B2B + B2C experience workbench</p>
+        </div>
+      </div>
+      <div class="persona-switcher" id="persona-switcher">
+        <button class="persona-button" data-persona="b2b">B2B Workspace</button>
+        <button class="persona-button" data-persona="b2c">B2C Workspace</button>
+      </div>
+      <div class="session-meta">
+        <span class="pill">Alpha Sandbox</span>
+        <span class="timestamp" id="timestamp"></span>
+      </div>
+    </div>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow" id="persona-eyebrow"></p>
+          <h1 id="hero-title"></h1>
+          <p class="hero-subtitle" id="hero-subtitle"></p>
+        </div>
+        <div class="hero-actions" id="hero-actions"></div>
+      </section>
+
+      <section class="summary-section">
+        <header>
+          <h2>Live signal overview</h2>
+          <p>Operational KPIs from catalog, checkout, and fulfillment services.</p>
+        </header>
+        <div id="summary-cards" class="summary-grid"></div>
+      </section>
+
+      <section class="journey-section">
+        <header>
+          <h2>End-to-end journey</h2>
+          <p>Track adoption progress across onboarding, shopping, checkout, and post-purchase stages.</p>
+        </header>
+        <div id="journey-steps" class="journey-steps"></div>
+      </section>
+
+      <section class="grid two-column">
+        <div class="panel" id="primary-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-eyebrow" id="primary-eyebrow"></p>
+              <h3 id="primary-title"></h3>
+            </div>
+            <button id="primary-cta" class="ghost-button"></button>
+          </div>
+          <div id="primary-content"></div>
+        </div>
+        <div class="panel" id="secondary-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-eyebrow" id="secondary-eyebrow"></p>
+              <h3 id="secondary-title"></h3>
+            </div>
+          </div>
+          <div id="secondary-content"></div>
+        </div>
+      </section>
+
+      <section class="grid two-column">
+        <div class="panel" id="callouts-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-eyebrow">Cross-team alerts</p>
+              <h3>What needs attention</h3>
+            </div>
+          </div>
+          <ul class="callouts" id="callouts"></ul>
+        </div>
+        <div class="panel" id="roadmap-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-eyebrow">Rollout checklist</p>
+              <h3>Next build steps</h3>
+            </div>
+          </div>
+          <ol class="roadmap" id="roadmap"></ol>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Prototype aligned to the Unified B2B/B2C PRD · Feature toggles simulated with mock data.</p>
+    </footer>
+
+    <script type="module" src="mock-data.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

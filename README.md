@@ -52,6 +52,18 @@ This repository contains a reference implementation of a health claims processin
   Then open [http://localhost:4173](http://localhost:4173) in your browser.
 - **Firebase Hosting:** Use the shared hosting configuration to deploy the static prototype with `firebase deploy --only hosting:fieldService` after mapping the `fieldService` target to your site ID (pre-set to `open-ai-project-723a7`). See [Firebase Hosting Deployment Guide](docs/firebase-hosting.md).
 
+## Running the Unified Commerce Portal Prototype
+This static prototype reflects the Unified B2B/B2C Site PRD and does not require Firebase.
+
+1. **Start a local server**
+   ```bash
+   cd commerce_portal
+   python -m http.server 4173
+   ```
+2. **Open the workspace**
+   - Navigate to [http://localhost:4173/](http://localhost:4173/) to explore persona-specific dashboards.
+   - Use the B2B/B2C toggle in the top bar to preview the tailored KPIs, workflows, and rollout checklist.
+
 ## Documentation
 - [PRD](docs/claims-processing-prd.md)
 - [Application Architecture](docs/claims-processing-app.md)
